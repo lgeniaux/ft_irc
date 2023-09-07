@@ -1,6 +1,7 @@
 #include "Command.hpp"
 #include <sstream>
 #include <iterator>
+#include <tr1/unordered_map>
 
 void CommandHandler::handleCommand(const std::string& command, int client_fd, std::map<int, std::string>& nicknames) {
     std::istringstream iss(command);
@@ -10,7 +11,7 @@ void CommandHandler::handleCommand(const std::string& command, int client_fd, st
 
     typedef void (*commandFunction)(const std::vector<std::string>&, int, std::map<int, std::string>&);
 
-    std::unordered_map<std::string, commandFunction> commandRegistry;
+    std::tr1::unordered_map<std::string, commandFunction> commandRegistry;
 
     commandRegistry["NICK"] = handleNICK;
     commandRegistry["JOIN"] = handleJOIN;
