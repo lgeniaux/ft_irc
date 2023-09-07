@@ -16,7 +16,7 @@ public:
     void acceptClient();
     void authenticateClient(int client_fd);
     void readFromClient(int client_fd);
-    void broadcastMessage(const std::string& message);
+    void broadcastMessage(const std::string& message, int sender_fd);
 
 private:
     int port;

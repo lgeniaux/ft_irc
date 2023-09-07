@@ -2,6 +2,8 @@
 #include <iostream>
 #include <unistd.h>
 #include <cstring>
+#include <cerrno>
+#include <cstdio>
 
 Server::Server(int port, const std::string& password)
     : port(port), password(password), server_fd(-1) {
@@ -36,14 +38,46 @@ void Server::run() {
 
     std::cout << "Server is running..." << std::endl;
 
+    fd_set readfds;
+    int max_sd, sd;
+
     while (true) {
-        acceptClient();
-        // NOTE: SEULEMENT POUR TESTER, I/O BLOCKING INTERDIT
-        if (!clients.empty()) {
-            int latestClientFd = clients.rbegin()->first; // Recupere le dernier client connecté
-            readFromClient(latestClientFd);
+        FD_ZERO(&readfds);
+
+        FD_SET(server_fd, &readfds);
+        max_sd = server_fd;
+
+        std::map<int, sockaddr_in>::iterator it;
+        for (it = clients.begin(); it != clients.end(); ++it) {
+            sd = it->first;
+            if (sd > 0) {
+                FD_SET(sd, &readfds);
+            }
+            if (sd > max_sd) {
+                max_sd = sd;
+            }
         }
+
+        // Attendre qu'une activité soit détectée sur un des sockets
+        int activity = select(max_sd + 1, &readfds, NULL, NULL, NULL);
+
+        if ((activity < 0) && (errno!=EINTR)) {
+            perror("select error");
+        }
+
+        if (FD_ISSET(server_fd, &readfds)) {
+            acceptClient();
+        }
+
+        // Vérifier si une activité est détectée sur un des clients connectés
+        for (it = clients.begin(); it != clients.end(); ++it) {
+            sd = it->first;
+            if (FD_ISSET(sd, &readfds)) {
+                readFromClient(sd);
+            }
     }
+}
+
 }
 
 void Server::acceptClient() {
@@ -84,12 +118,16 @@ void Server::readFromClient(int client_fd) {
 
     // Envoyer le message à tous les clients connectés
     commandHandler.handleCommand(message, client_fd, nicknames);
-    broadcastMessage(message);
+    broadcastMessage(message, client_fd);
 }
 
-void Server::broadcastMessage(const std::string& message) {
-    for (std::map<int, sockaddr_in>::iterator it = clients.begin(); it != clients.end(); ++it) {
+void Server::broadcastMessage(const std::string& message, int sender_fd) {
+    for (std::map<int, sockaddr_in>::iterator it = clients.begin(); it != clients.end(); ++it) {     
         int client_fd = it->first;
+        // Ne pas envoyer le message au client qui l'a envoyé
+        if (client_fd == sender_fd) {
+            continue;
+        }
         send(client_fd, message.c_str(), message.size(), 0);
     }
 }

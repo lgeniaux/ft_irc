@@ -12,7 +12,7 @@ void CommandHandler::handleCommand(const std::string& command, int client_fd, st
     for (; issIt != end; ++issIt) {
         tokens.push_back(*issIt);
     }
-    
+
     if (tokens.empty()) {
         return;
     }
@@ -37,8 +37,6 @@ void CommandHandler::handleCommand(const std::string& command, int client_fd, st
             return;
         }
         handlePRIVMSG(tokens, client_fd, nicknames);
-    } else {
-        std::cerr << "Unknown command: " << cmd << std::endl;
     }
 }
 
