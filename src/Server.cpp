@@ -4,6 +4,8 @@
 #include <cstring>
 #include <cerrno>
 #include <cstdio>
+#include <algorithm>
+
 
 Server::Server(int port, const std::string& password)
     : port(port), password(password), server_fd(-1) {
@@ -106,11 +108,9 @@ void Server::authenticateClient(int client_fd) {
     std::string received_password(buffer, bytes_read);
     std::cout << "Authenticating client: " << client_fd << std::endl;
 
-    if (!received_password.empty() && received_password[received_password.size() - 1] == '\n') {
-        received_password.erase(received_password.size() - 1);
-    }
-    std::cout << "Received password: [" << received_password << "]" << std::endl;
-    std::cout << "Expected password: [" << password << "]" << std::endl;
+    //Cleaning user input before comparing
+    received_password.erase(std::remove(received_password.begin(), received_password.end(), '\n'), received_password.end());
+    received_password.erase(std::remove(received_password.begin(), received_password.end(), '\r'), received_password.end());
 
     if (received_password == password) {
         std::string auth_success = "Authentication success.\n";
