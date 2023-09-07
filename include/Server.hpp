@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include "Command.hpp"
 
 class Server {
 public:
@@ -23,6 +24,8 @@ private:
     int server_fd;
     sockaddr_in address;
     std::map<int, sockaddr_in> clients;
+    CommandHandler commandHandler;
+    std::map<int, std::string> nicknames;  // Map client FD -> nicknames
 };
 
 #endif

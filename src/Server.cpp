@@ -83,6 +83,7 @@ void Server::readFromClient(int client_fd) {
     std::cout << "Received message: " << message << std::endl;
 
     // Envoyer le message à tous les clients connectés
+    commandHandler.handleCommand(message, client_fd, nicknames);
     broadcastMessage(message);
 }
 
