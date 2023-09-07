@@ -1,0 +1,11 @@
+.vscode/
+.obj/
+
+ircserv
+
+en.subject.pdf
+fr.subject.pdf
+
+*.o
+*.d
+*.a
