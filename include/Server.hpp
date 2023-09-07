@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include "Command.hpp"
+#include "Client.hpp"
 
 class Server {
 public:
@@ -15,17 +16,16 @@ public:
     void run();
     void acceptClient();
     void authenticateClient(int client_fd);
-    void readFromClient(int client_fd);
-    void broadcastMessage(const std::string& message);
+    void readFromClient(Client& client);
+    void broadcastMessage(const std::string& message, int sender_fd);
 
 private:
     int port;
     std::string password;
     int server_fd;
     sockaddr_in address;
-    std::map<int, sockaddr_in> clients;
     CommandHandler commandHandler;
-    std::map<int, std::string> nicknames;  // Map client FD -> nicknames
+    std::map<int, Client> clients;
 };
 
 #endif

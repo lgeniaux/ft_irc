@@ -2,6 +2,8 @@
 #include <iostream>
 #include <unistd.h>
 #include <cstring>
+#include <cerrno>
+#include <cstdio>
 
 Server::Server(int port, const std::string& password)
     : port(port), password(password), server_fd(-1) {
@@ -36,15 +38,41 @@ void Server::run() {
 
     std::cout << "Server is running..." << std::endl;
 
+
+    fd_set readfds;
+    int max_sd;
+
     while (true) {
-        acceptClient();
-        // NOTE: SEULEMENT POUR TESTER, I/O BLOCKING INTERDIT
-        if (!clients.empty()) {
-            int latestClientFd = clients.rbegin()->first; // Recupere le dernier client connecté
-            readFromClient(latestClientFd);
+        FD_ZERO(&readfds);
+        FD_SET(server_fd, &readfds);
+        max_sd = server_fd;
+
+        for (std::map<int, Client>::iterator it = clients.begin(); it != clients.end(); ++it) {
+            int sd = it->first;
+            FD_SET(sd, &readfds);
+            if (sd > max_sd) {
+                max_sd = sd;
+            }
+        }
+
+        int activity = select(max_sd + 1, &readfds, NULL, NULL, NULL);
+
+        if ((activity < 0) && (errno != EINTR)) {
+            perror("select error");
+        }
+
+        if (FD_ISSET(server_fd, &readfds)) {
+            acceptClient();
+        }
+
+        for (std::map<int, Client>::iterator it = clients.begin(); it != clients.end(); ++it) {
+            if (FD_ISSET(it->first, &readfds)) {
+                readFromClient(it->second);
+            }
         }
     }
 }
+
 
 void Server::acceptClient() {
     sockaddr_in client_address;
@@ -56,12 +84,13 @@ void Server::acceptClient() {
         return;
     }
 
+    Client newClient(client_fd, client_address);
+    clients[client_fd] = newClient;
+
     std::cout << "Client connected: " << client_fd << std::endl;
 
     authenticateClient(client_fd);
 
-    //Ajoute le client à la liste des clients connectés
-    clients[client_fd] = client_address;
 }
 
 void Server::authenticateClient(int client_fd) {
@@ -69,9 +98,11 @@ void Server::authenticateClient(int client_fd) {
     std::cout << "Authenticating client: " << client_fd << std::endl;
 }
 
-void Server::readFromClient(int client_fd) {
+void Server::readFromClient(Client& client) {
+    int client_fd = client.getFd();
     char buffer[1024] = {0};
     ssize_t bytes_read = recv(client_fd, buffer, sizeof(buffer), 0);
+
     if (bytes_read <= 0) {
         std::cerr << "Failed to read from client or client disconnected." << std::endl;
         close(client_fd);
@@ -81,15 +112,19 @@ void Server::readFromClient(int client_fd) {
 
     std::string message(buffer, bytes_read);
     std::cout << "Received message: " << message << std::endl;
-
-    // Envoyer le message à tous les clients connectés
-    commandHandler.handleCommand(message, client_fd, nicknames);
-    broadcastMessage(message);
+    broadcastMessage(message, client_fd);
 }
 
-void Server::broadcastMessage(const std::string& message) {
-    for (std::map<int, sockaddr_in>::iterator it = clients.begin(); it != clients.end(); ++it) {
+void Server::broadcastMessage(const std::string& message, int sender_fd) {
+    for (std::map<int, Client>::iterator it = clients.begin(); it != clients.end(); ++it) {
         int client_fd = it->first;
+        // Client& client = it->second; Pour l'instant pas besoin car tous les clients sont authentifiés
+
+        // Ne pas envoyer le message au client qui l'a envoyé
+        if (client_fd == sender_fd) {
+            continue;
+        }
+
         send(client_fd, message.c_str(), message.size(), 0);
     }
 }
