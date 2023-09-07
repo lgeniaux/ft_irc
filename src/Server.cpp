@@ -94,19 +94,48 @@ void Server::acceptClient() {
 }
 
 void Server::authenticateClient(int client_fd) {
-    // SYSTEME D'AUTHENTIFICATION A IMPLEMENTER ICI
+    std::string authMessage = "Enter password: ";
+    send(client_fd, authMessage.c_str(), authMessage.size(), 0);
+    
+    char buffer[1024] = {0};
+    ssize_t bytes_read = readFromSocket(client_fd, buffer, sizeof(buffer));
+    if (bytes_read <= 0) {
+        return;
+    }
+
+    std::string received_password(buffer, bytes_read);
     std::cout << "Authenticating client: " << client_fd << std::endl;
+
+    if (!received_password.empty() && received_password[received_password.size() - 1] == '\n') {
+        received_password.erase(received_password.size() - 1);
+    }
+    std::cout << "Received password: [" << received_password << "]" << std::endl;
+    std::cout << "Expected password: [" << password << "]" << std::endl;
+
+    if (received_password == password) {
+        std::string auth_success = "Authentication success.\n";
+        std:: cout << auth_success.substr(0, auth_success.length() - 2)  << " for client :" << client_fd << std::endl; 
+        send(client_fd, auth_success.c_str(), auth_success.size(), 0);
+        clients[client_fd].setAuthenticated(true);
+    }else{
+        std::string auth_failed = "Authentication failed.\n";
+        std:: cout << auth_failed.substr(0, auth_failed.length() - 2) << " for client :" << client_fd << std::endl; 
+        send(client_fd, auth_failed.c_str(), auth_failed.size(), 0);
+        close(client_fd);
+        clients.erase(client_fd);
+        return;
+    }
 }
 
 void Server::readFromClient(Client& client) {
+    if (!client.isAuthenticated()) {
+        return;
+    }
+
     int client_fd = client.getFd();
     char buffer[1024] = {0};
-    ssize_t bytes_read = recv(client_fd, buffer, sizeof(buffer), 0);
-
+    ssize_t bytes_read = readFromSocket(client_fd, buffer, sizeof(buffer));
     if (bytes_read <= 0) {
-        std::cerr << "Failed to read from client or client disconnected." << std::endl;
-        close(client_fd);
-        clients.erase(client_fd);
         return;
     }
 
@@ -127,4 +156,14 @@ void Server::broadcastMessage(const std::string& message, int sender_fd) {
 
         send(client_fd, message.c_str(), message.size(), 0);
     }
+}
+
+ssize_t Server::readFromSocket(int client_fd, char *buffer, size_t size) {
+    ssize_t bytes_read = recv(client_fd, buffer, size, 0);
+    if (bytes_read <= 0) {
+        std::cerr << "Failed to read from client or client disconnected." << std::endl;
+        close(client_fd);
+        clients.erase(client_fd);
+    }
+    return bytes_read;
 }

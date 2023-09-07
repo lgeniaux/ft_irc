@@ -26,6 +26,7 @@ private:
     sockaddr_in address;
     CommandHandler commandHandler;
     std::map<int, Client> clients;
+    ssize_t readFromSocket(int client_fd, char *buffer, size_t size);
 };
 
 #endif
