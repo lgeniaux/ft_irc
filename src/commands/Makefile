@@ -14,9 +14,15 @@ SHELL := /bin/bash
 NAME := commands.a
 CC := c++
 
-SRC_FILE := PRIVMSG.cpp \
+SRC_FILE := INVITE.cpp \
+			JOIN.cpp \
+			KICK.cpp \
+			MODE.cpp \
 			NICK.cpp \
-			JOIN.cpp
+			PASS.cpp \
+			USER.cpp \
+			TOPIC.cpp
+
 OBJ_FILE := $(SRC_FILE:.cpp=.o)
 OBJ = $(addprefix $(DIR_OBJ)/, $(OBJ_FILE))
 
