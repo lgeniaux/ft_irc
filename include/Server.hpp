@@ -25,7 +25,7 @@ public:
     void joinChannel(const std::string& name, int client_fd);
     void leaveChannel(const std::string& name, int client_fd);
     void broadcastToChannel(const std::string& message, const std::string& channelName, int sender_fd);
-    Channel& getChannel(const std::string& name);
+    Channel* getChannel(const std::string& name);
     friend class CommandHandler;  
     
 private:

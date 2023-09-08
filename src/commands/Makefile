@@ -21,7 +21,8 @@ SRC_FILE := INVITE.cpp \
 			NICK.cpp \
 			PASS.cpp \
 			USER.cpp \
-			TOPIC.cpp
+			TOPIC.cpp \
+			CAP.cpp \
 
 OBJ_FILE := $(SRC_FILE:.cpp=.o)
 OBJ = $(addprefix $(DIR_OBJ)/, $(OBJ_FILE))

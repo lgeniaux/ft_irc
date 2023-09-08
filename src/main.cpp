@@ -16,9 +16,5 @@ int main(int argc, char *argv[]) {
     Server server(port, password);
     server.run();
 
-    //Create a default channel without invite
-    server.createChannel("#default");
-    server.getChannel("#default").setMode('i', false);
-
     return 0;
 }

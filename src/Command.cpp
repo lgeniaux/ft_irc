@@ -23,7 +23,7 @@ void CommandHandler::handleCommand(const std::string& command, int client_fd, Se
     commandRegistry["NICK"] = handleNICK;
     commandRegistry["PASS"] = handlePASS;
     commandRegistry["USER"] = handleUSER;
-
+    commandRegistry["CAP"] = handleCAP;
 
     for (; issIt != end; ++issIt) {
         tokens.push_back(*issIt);
@@ -42,3 +42,4 @@ void CommandHandler::handleCommand(const std::string& command, int client_fd, Se
     std::cerr << "Unknown command: " << cmd << std::endl;
     return;
 }
+

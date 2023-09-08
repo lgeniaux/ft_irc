@@ -18,6 +18,7 @@ SRC_FILE :=	Command.cpp \
 			Channel.cpp \
 			Server.cpp \
 			Client.cpp \
+			RFC2812Handler.cpp \
 			main.cpp
 OBJ = $(addprefix $(DIR_OBJ)/, $(SRC_FILE:.cpp=.o))
 

@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <sstream>
 #include "Command.hpp"
+#include "RFC2812Handler.hpp"
 
 Server::Server(int port, const std::string& password)
     : port(port), password(password), server_fd(-1) {
@@ -102,6 +103,7 @@ void Server::authenticateClient(int client_fd) {
     char buffer[1024] = {0};
     ssize_t bytes_read = readFromSocket(client_fd, buffer, sizeof(buffer));
     if (bytes_read <= 0) {
+        std::cout << "Client disconnected." << std::endl;
         return;
     }
     
@@ -109,13 +111,15 @@ void Server::authenticateClient(int client_fd) {
     std::istringstream f(completeMessage);
     std::string line;
     std::cout << "Authenticating client : "<< client_fd << std::endl;
+    //debug print teh data the user is sending
+    std::cout << "Data received : " << completeMessage << std::endl;
+    
     while (std::getline(f, line)) {
         commandHandler->handleCommand(line, client_fd, *this);
     }
     if (clients[client_fd].isPassReceived() && clients[client_fd].isNickReceived() && clients[client_fd].isUserReceived()) {
         clients[client_fd].setAuthenticated(true);
-        std::string auth_success = "Authentication success.\n";
-        send(client_fd, auth_success.c_str(), auth_success.size(), 0);
+        RFC2812Handler::sendInitialConnectionMessages(clients[client_fd]);
     }
     //Debug :
     std::cout << "Client authenticated : " << clients[client_fd].isAuthenticated() << std::endl;
@@ -125,10 +129,10 @@ void Server::authenticateClient(int client_fd) {
     
 }
 
-
-
 void Server::readFromClient(Client& client) {
     if (!client.isAuthenticated()) {
+        //client is not authenticated yet, we listen to him again to get all the command (PASS, NICK, USER)
+        authenticateClient(client.getFd());
         return;
     }
 
@@ -148,16 +152,13 @@ void Server::readFromClient(Client& client) {
 }
 
 void Server::broadcastMessage(const std::string& message, int sender_fd) {
+    std::string formattedMessage = RFC2812Handler::formatMessage(message);
     for (std::map<int, Client>::iterator it = clients.begin(); it != clients.end(); ++it) {
         int client_fd = it->first;
-        // Client& client = it->second; Pour l'instant pas besoin car tous les clients sont authentifiés
-
-        // Ne pas envoyer le message au client qui l'a envoyé
         if (client_fd == sender_fd) {
             continue;
         }
-
-        send(client_fd, message.c_str(), message.size(), 0);
+        send(client_fd, formattedMessage.c_str(), formattedMessage.size(), 0);
     }
 }
 
@@ -178,11 +179,14 @@ void Server::createChannel(const std::string& name) {
 
 void Server::joinChannel(const std::string& name, int client_fd) {
     if (channels.find(name) == channels.end()) {
-        std::cerr << "Channel " << name << " does not exist" << std::endl;
+        //In most IRC servers if a user tries to join an unexisting channel, it is created. The user is also made operator of the channel.
+        createChannel(name);
+        channels[name].addOperator(client_fd);
     }
     channels[name].addUser(client_fd);
-    std::string response = "You have joined channel " + name;
-    send(client_fd, response.c_str(), response.length(), 0);
+    //send a RFC2812 message to the client to inform him that he joined the channel
+    RFC2812Handler::sendResponse(332, clients[client_fd], name);
+
 }
 
 
@@ -207,10 +211,11 @@ void Server::broadcastToChannel(const std::string& message, const std::string& c
 }
 
 
-Channel& Server::getChannel(const std::string& name) {
+Channel* Server::getChannel(const std::string& name) {
     if (channels.find(name) == channels.end()) {
         std::cerr << "Channel " << name << " does not exist" << std::endl;
+        return NULL;
     }
     
-    return channels[name];
+    return &channels[name];
 }

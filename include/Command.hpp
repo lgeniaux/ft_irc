@@ -20,6 +20,7 @@ class CommandHandler {
         static void handlePASS(const std::vector<std::string>& tokens, int client_fd, Server& server);
         static void handleNICK(const std::vector<std::string>& tokens, int client_fd, Server& server);
         static void handleUSER(const std::vector<std::string>& tokens, int client_fd, Server& server);
+        static void handleCAP(const std::vector<std::string>& tokens, int client_fd, Server& server);
 
 };
 

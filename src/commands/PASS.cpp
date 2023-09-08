@@ -1,31 +1,26 @@
 #include "Command.hpp"
+#include "RFC2812Handler.hpp"
 #include <unistd.h>
 
+
 void CommandHandler::handlePASS(const std::vector<std::string>& tokens, int client_fd, Server& server) {
-    // Check if the client is already authenticated
     if (server.clients[client_fd].isAuthenticated()) {
-        std::string response = "Already authenticated. PASS command is invalid now.\n";
-        send(client_fd, response.c_str(), response.length(), 0);
+        RFC2812Handler::sendResponse(462, server.clients[client_fd], ":You may not reregister");
         return;
     }
 
     if (tokens.size() < 2) {
-        std::string response = "Not enough arguments for PASS.\n";
-        send(client_fd, response.c_str(), response.length(), 0);
+        RFC2812Handler::sendResponse(461, server.clients[client_fd], "PASS :Not enough parameters");
         return;
     }
 
     std::string suppliedPassword = tokens[1];
-
-    // Check against the server's password
     if (suppliedPassword != server.password) {
-        std::string auth_failed = "Authentication failed.\n";
-        send(client_fd, auth_failed.c_str(), auth_failed.size(), 0);
+        RFC2812Handler::sendResponse(464, server.clients[client_fd], ":Password incorrect");
         close(client_fd);
         server.clients.erase(client_fd);
         return;
     }
 
-    // Set the client as authenticated
     server.clients[client_fd].setPassReceived(true);
 }
