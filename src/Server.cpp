@@ -5,16 +5,19 @@
 #include <cerrno>
 #include <cstdio>
 #include <algorithm>
-
+#include <sstream>
+#include "Command.hpp"
 
 Server::Server(int port, const std::string& password)
     : port(port), password(password), server_fd(-1) {
+    commandHandler = new CommandHandler();
 }
 
 Server::~Server() {
     if (server_fd != -1) {
         close(server_fd);
     }
+    delete commandHandler;
 }
 
 void Server::run() {
@@ -96,36 +99,33 @@ void Server::acceptClient() {
 }
 
 void Server::authenticateClient(int client_fd) {
-    std::string authMessage = "Enter password: ";
-    send(client_fd, authMessage.c_str(), authMessage.size(), 0);
-    
     char buffer[1024] = {0};
     ssize_t bytes_read = readFromSocket(client_fd, buffer, sizeof(buffer));
     if (bytes_read <= 0) {
         return;
     }
-
-    std::string received_password(buffer, bytes_read);
-    std::cout << "Authenticating client: " << client_fd << std::endl;
-
-    //Cleaning user input before comparing
-    received_password.erase(std::remove(received_password.begin(), received_password.end(), '\n'), received_password.end());
-    received_password.erase(std::remove(received_password.begin(), received_password.end(), '\r'), received_password.end());
-
-    if (received_password == password) {
-        std::string auth_success = "Authentication success.\n";
-        std:: cout << auth_success.substr(0, auth_success.length() - 2)  << " for client :" << client_fd << std::endl; 
-        send(client_fd, auth_success.c_str(), auth_success.size(), 0);
-        clients[client_fd].setAuthenticated(true);
-    }else{
-        std::string auth_failed = "Authentication failed.\n";
-        std:: cout << auth_failed.substr(0, auth_failed.length() - 2) << " for client :" << client_fd << std::endl; 
-        send(client_fd, auth_failed.c_str(), auth_failed.size(), 0);
-        close(client_fd);
-        clients.erase(client_fd);
-        return;
+    
+    std::string completeMessage(buffer, bytes_read);
+    std::istringstream f(completeMessage);
+    std::string line;
+    std::cout << "Authenticating client : "<< client_fd << std::endl;
+    while (std::getline(f, line)) {
+        commandHandler->handleCommand(line, client_fd, *this);
     }
+    if (clients[client_fd].isPassReceived() && clients[client_fd].isNickReceived() && clients[client_fd].isUserReceived()) {
+        clients[client_fd].setAuthenticated(true);
+        std::string auth_success = "Authentication success.\n";
+        send(client_fd, auth_success.c_str(), auth_success.size(), 0);
+    }
+    //Debug :
+    std::cout << "Client authenticated : " << clients[client_fd].isAuthenticated() << std::endl;
+    std::cout << "Client pass received : " << clients[client_fd].isPassReceived() << std::endl;
+    std::cout << "Client nick received : " << clients[client_fd].isNickReceived() << std::endl;
+    std::cout << "Client user received : " << clients[client_fd].isUserReceived() << std::endl;
+    
 }
+
+
 
 void Server::readFromClient(Client& client) {
     if (!client.isAuthenticated()) {
@@ -140,6 +140,9 @@ void Server::readFromClient(Client& client) {
     }
 
     std::string message(buffer, bytes_read);
+    //handle message as command
+    commandHandler->handleCommand(message, client_fd, *this);
+
     std::cout << "Received message: " << message << std::endl;
     broadcastMessage(message, client_fd);
 }
@@ -166,4 +169,48 @@ ssize_t Server::readFromSocket(int client_fd, char *buffer, size_t size) {
         clients.erase(client_fd);
     }
     return bytes_read;
+}
+
+void Server::createChannel(const std::string& name) {
+    channels[name] = Channel(name);
+}
+
+
+void Server::joinChannel(const std::string& name, int client_fd) {
+    if (channels.find(name) == channels.end()) {
+        std::cerr << "Channel " << name << " does not exist" << std::endl;
+    }
+    channels[name].addUser(client_fd);
+    std::string response = "You have joined channel " + name;
+    send(client_fd, response.c_str(), response.length(), 0);
+}
+
+
+void Server::leaveChannel(const std::string& name, int client_fd) {
+    if (channels.find(name) != channels.end()) {
+        channels[name].removeUser(client_fd);
+    }
+}
+
+void Server::broadcastToChannel(const std::string& message, const std::string& channelName, int sender_fd) {
+    std::map<std::string, Channel>::iterator it = channels.find(channelName);
+    if (it != channels.end()) {
+        Channel& channel = it->second;
+        std::set<int> users = channel.getUsers();
+        for (std::set<int>::iterator userIt = users.begin(); userIt != users.end(); ++userIt) {
+            int client_fd = *userIt;
+            if (client_fd != sender_fd) {
+                send(client_fd, message.c_str(), message.size(), 0);
+            }
+        }
+    }
+}
+
+
+Channel& Server::getChannel(const std::string& name) {
+    if (channels.find(name) == channels.end()) {
+        std::cerr << "Channel " << name << " does not exist" << std::endl;
+    }
+    
+    return channels[name];
 }
