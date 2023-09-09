@@ -8,6 +8,7 @@
 #include <netinet/in.h>
 #include "Client.hpp"
 #include "Channel.hpp"
+#include "RFC2812Handler.hpp"
 
 class CommandHandler;
 
@@ -20,6 +21,7 @@ public:
     void authenticateClient(int client_fd);
     void readFromClient(Client& client);
     void broadcastMessage(const std::string& message, int sender_fd);
+    Client& getClient(int client_fd);
     // Channel methods
     void createChannel(const std::string& name);
     void joinChannel(const std::string& name, int client_fd);
@@ -37,6 +39,7 @@ private:
     std::map<int, Client> clients;
     ssize_t readFromSocket(int client_fd, char *buffer, size_t size);
     std::map<std::string, Channel> channels; // name -> channel object
+    RFC2812Handler rfcHandler;
 };
 
 #endif

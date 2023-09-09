@@ -1,34 +1,32 @@
 #include "Command.hpp"
 #include "Channel.hpp"
 #include "Server.hpp"
-
+#include "RFC2812Handler.hpp"
 
 void CommandHandler::handleJOIN(const std::vector<std::string>& tokens, int client_fd, Server& server) {
+    RFC2812Handler rfcHandler;  // Initialize here
+    
     if (tokens.size() < 2) {
-        std::string response = "Not enough arguments";
-        send(client_fd, response.c_str(), response.length(), 0);
+        rfcHandler.sendResponse(461, server.getClient(client_fd), "JOIN :Not enough parameters");
         return;
     }
 
     const std::string& channelName = tokens[1];
     Channel* channel = server.getChannel(channelName);
-    if (channel == NULL) { //if the channel does not exist getChannel returns  "return *(new Channel("null", "null"));""
-        //a bit tricky but the channel is created here and the user automaticly joins it
+
+    if (channel == nullptr) {
         server.joinChannel(channelName, client_fd);
-    }
-    else if (channel->getMode('i') && !channel->isInvited(client_fd)) { // here we check if the channel is invite only and if the user is invited
-        std::string response = "You must be invited to join this channel";
-        send(client_fd, response.c_str(), response.length(), 0);
+    } else if (channel->getMode('i') && !channel->isInvited(client_fd)) {
+        rfcHandler.sendResponse(473, server.getClient(client_fd), channelName + " :Cannot join channel (+i)");
         return;
     }
-    
-    //if the channel exists and is not in invite only mode or if the user is invited we join the channel
-    server.joinChannel(channelName, client_fd);
-    //Complying RFC 2812 response (incomplete for the moment)
-    // std::string response = ":" + server.getHostname() + " 332 " + std::to_string(client_fd) + " " + channelName + " :" + channel.getTopic() + "\n";
-    std::cout << "User " << client_fd << " joined channel " << channelName << std::endl;
-    //if he had an invite, remove it
-    if (channel->isInvited(client_fd)) 
-        channel->removeInvite(client_fd);
 
+    server.joinChannel(channelName, client_fd);
+
+    std::cout << "User " << client_fd << " joined channel " << channelName << std::endl;
+
+    channel = server.getChannel(channelName);  // Refresh the channel pointer
+    if (channel != nullptr && channel->isInvited(client_fd)) {
+        channel->removeInvite(client_fd);
+    }
 }

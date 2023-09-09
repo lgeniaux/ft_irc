@@ -73,8 +73,7 @@ void Server::run()
 
         int activity = select(max_sd + 1, &readfds, NULL, NULL, NULL);
 
-        
-        if ((activity < 0) && (errno != EINTR))
+                if ((activity < 0) && (errno != EINTR))
         {
             perror("select error");
         }
@@ -272,4 +271,9 @@ Channel *Server::getChannel(const std::string &name)
     }
 
     return &channels[name];
+}
+
+Client &Server::getClient(int client_fd)
+{
+    return clients[client_fd];
 }
