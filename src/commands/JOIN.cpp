@@ -14,7 +14,7 @@ void CommandHandler::handleJOIN(const std::vector<std::string>& tokens, int clie
     const std::string& channelName = tokens[1];
     Channel* channel = server.getChannel(channelName);
 
-    if (channel == nullptr) {
+    if (channel == NULL) {
         server.joinChannel(channelName, client_fd);
     } else if (channel->getMode('i') && !channel->isInvited(client_fd)) {
         rfcHandler.sendResponse(473, server.getClient(client_fd), channelName + " :Cannot join channel (+i)");
@@ -26,7 +26,7 @@ void CommandHandler::handleJOIN(const std::vector<std::string>& tokens, int clie
     std::cout << "User " << client_fd << " joined channel " << channelName << std::endl;
 
     channel = server.getChannel(channelName);  // Refresh the channel pointer
-    if (channel != nullptr && channel->isInvited(client_fd)) {
+    if (channel != NULL && channel->isInvited(client_fd)) {
         channel->removeInvite(client_fd);
     }
 }
