@@ -7,6 +7,9 @@
 - 🐛 - Bugged
 - 🤝 - Assigned to
 
+## Connect with irssi client
+- /CONNECT -nocap -! <IP> <port> <password> <nickname>
+
 ## Initialization Phase
 - [✅] Set up the project structure with a Makefile, main file, and required headers. 
 - [✅] Establish basic server functionality: opening a socket, binding, and listening.
