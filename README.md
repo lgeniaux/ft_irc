@@ -27,11 +27,11 @@
 - [📝] Implement channel operator commands: KICK, INVITE, TOPIC, MODE. 🤝 Louis
 
 ## Concurrency Phase
-- [📝] Ensure that the server can handle multiple clients simultaneously. 
-- [📝] Implement non-blocking I/O using poll() or its equivalent. 
+- [✅] Ensure that the server can handle multiple clients simultaneously. 
+- [✅] Implement non-blocking I/O using poll() or its equivalent. (I decided to use select() but could be changed if needed later)
 
 ## Testing and Debugging Phase
-- [📝] Choose a reference IRC client and test all functionalities. (probably weechat)
+- [✅] Choose a reference IRC client and test all functionalities. (irssi here)
 - [📝] Ensure error-free operations and compliance with requirements. 
 - [📝] Address any bugs and ensure stability. 
 
