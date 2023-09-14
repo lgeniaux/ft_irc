@@ -3,7 +3,7 @@
 #include "Server.hpp"
 #include <sstream>
 #include <iterator>
-#include <tr1/unordered_map>
+#include <map>
 #include <unistd.h>
 
 void CommandHandler::handleCommand(const std::string& command, int client_fd, Server& server) {
@@ -12,7 +12,7 @@ void CommandHandler::handleCommand(const std::string& command, int client_fd, Se
     std::istream_iterator<std::string> end;
     std::vector<std::string> tokens;
 
-    std::tr1::unordered_map<std::string, void (*)(const std::vector<std::string>&, int, Server&)> commandRegistry;
+    std::map<std::string, void (*)(const std::vector<std::string>&, int, Server&)> commandRegistry;
 
 
     commandRegistry["JOIN"] = handleJOIN;
