@@ -29,7 +29,7 @@ void Server::run()
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd == -1)
     {
-        std::cerr << "Failed to create socket" << std::endl;
+        std::cerr << ERROR << "Failed to create socket" << std::endl;
         return;
     }
 
@@ -39,24 +39,24 @@ void Server::run()
 
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
     {
-        std::cerr << "Bind failed" << std::endl;
+        std::cerr << ERROR << "Bind failed" << std::endl;
         return;
     }
 
     if (listen(server_fd, 3) < 0)
     {
-        std::cerr << "Listen failed" << std::endl;
+        std::cerr << ERROR << "Listen failed" << std::endl;
         return;
     }
 
-    std::cout << "Server is running..." << std::endl;
+    std::cout << INFO << "Server is running..." << std::endl;
 
     fd_set readfds;
     int max_sd;
 
     while (true)
     {
-        std::cout << "Server loop iteration" << std::endl;
+        std::cout << LIGHT GRAY << "Server loop iteration" << RESET << std::endl;
         FD_ZERO(&readfds);
         FD_SET(server_fd, &readfds);
         max_sd = server_fd;
@@ -101,14 +101,14 @@ void Server::acceptClient()
 
     if (client_fd < 0)
     {
-        std::cerr << "Failed to accept client" << std::endl;
+        std::cerr << ERROR << "Failed to accept client" << std::endl;
         return;
     }
 
     Client newClient(client_fd, client_address);
     clients[client_fd] = newClient;
 
-    std::cout << "Client connected: " << client_fd << std::endl;
+    std::cout << GREEN << "Client connected: " << RESET << client_fd - 3 << std::endl;
 
     authenticateClient(client_fd);
 }
@@ -119,16 +119,19 @@ void Server::authenticateClient(int client_fd)
     ssize_t bytes_read = readFromSocket(client_fd, buffer, sizeof(buffer));
     if (bytes_read <= 0)
     {
-        std::cout << "Client disconnected." << std::endl;
+        std::cout << RED << "Client disconnected: " << client_fd - 3 << RESET << std::endl;
         return;
     }
 
     std::string completeMessage(buffer, bytes_read);
     std::istringstream f(completeMessage);
     std::string line;
-    std::cout << "Authenticating client : " << client_fd << std::endl;
-    // debug print teh data the user is sending
-    std::cout << "Data received : " << completeMessage << std::endl;
+    std::cout << LIGHT GRAY << "[" << client_fd - 3 << "] Authenticating client" << RESET << std::endl;
+    // debug print the data the user is sending
+    std::string debugMessage = completeMessage;
+    while (debugMessage.find("\r\n") != std::string::npos)
+        debugMessage.replace(debugMessage.find("\r\n"), 2, LIGHT PURPLE "\\r\\n" RESET);
+    std::cout << LIGHT GRAY << "[" << client_fd - 3 << "] Data received : " << RESET << debugMessage << std::endl;
 
     while (std::getline(f, line))
     {
@@ -140,13 +143,25 @@ void Server::authenticateClient(int client_fd)
         RFC2812Handler::sendInitialConnectionMessages(clients[client_fd]);
     }
     // Debug :
-    std::cout << "Client authenticated : " << clients[client_fd].isAuthenticated() << std::endl;
-    std::cout << "Client pass received : " << clients[client_fd].isPassReceived() << std::endl;
-    std::cout << "Client nick received : " << clients[client_fd].isNickReceived() << std::endl;
-    std::cout << "Client user received : " << clients[client_fd].isUserReceived() << std::endl;
+    if (clients[client_fd].isAuthenticated())
+        std::cout << "[" << client_fd - 3 << "] " << GREEN << "Client authenticated" << RESET << " | ";
+    else
+        std::cout << "[" << client_fd - 3 << "] " << RED << "Client not authenticated" << RESET << " | ";
+    if (clients[client_fd].isPassReceived())
+        std::cout << GREEN << "PASS received" << RESET << " | ";
+    else
+        std::cout << RED << "PASS not received" << RESET << " | ";
+    if (clients[client_fd].isNickReceived())
+        std::cout << GREEN << "NICK received" << RESET << " | ";
+    else
+        std::cout << RED << "NICK not received" << RESET << " | ";
+    if (clients[client_fd].isUserReceived())
+        std::cout << GREEN << "USER received" << RESET << std::endl;
+    else
+        std::cout << RED << "USER not received" << RESET << std::endl;
     if (clients.find(client_fd) != clients.end())
     {
-        std::cout << "Client socket is still open" << std::endl;
+        std::cout << "Client socket is still open" << RESET << std::endl;
     }
     else
     {
@@ -165,7 +180,7 @@ void Server::readFromClient(Client &client)
     }
     else
     {
-        std::cout << "Reading from authenticated client " << client.getFd() << std::endl; // Debug line
+        std::cout << LIGHT GRAY << "[" << client.getFd() - 3 << "] Reading from authenticated client" << RESET << std::endl; // Debug line
         int client_fd = client.getFd();
         char buffer[1024] = {0};
         ssize_t bytes_read = readFromSocket(client_fd, buffer, sizeof(buffer));
@@ -178,11 +193,14 @@ void Server::readFromClient(Client &client)
         // handle message as command
         commandHandler->handleCommand(message, client_fd, *this);
 
-        std::cout << "Received message: " << message << std::endl;
+        std::string debugMessage = message;
+        while (debugMessage.find("\r\n") != std::string::npos)
+            debugMessage.replace(debugMessage.find("\r\n"), 2, LIGHT PURPLE "\\r\\n" RESET);
+        std::cout << LIGHT GRAY << "Received message: " << RESET << debugMessage << std::endl;
         broadcastMessage(message, client_fd);
         if (clients.find(client_fd) != clients.end())
         {
-            std::cout << "Client socket is still open" << std::endl;
+            std::cout << LIGHT GRAY << "Client socket is still open" << std::endl;
         }
         else
         {
@@ -208,10 +226,10 @@ void Server::broadcastMessage(const std::string &message, int sender_fd)
 ssize_t Server::readFromSocket(int client_fd, char *buffer, size_t size)
 {
     ssize_t bytes_read = recv(client_fd, buffer, size, 0);
-    std::cout << "Bytes read from client " << client_fd << ": " << bytes_read << std::endl; // Debug line
+    std::cout << LIGHT GRAY << "[" << client_fd - 3 << "] bytes read: " << bytes_read << RESET << std::endl; // Debug line
     if (bytes_read <= 0)
     {
-        std::cerr << "Failed to read from client or client disconnected." << std::endl;
+        std::cerr << ERROR << "Failed to read from client or client disconnected." << std::endl;
         close(client_fd);
         clients.erase(client_fd);
     }
@@ -266,7 +284,7 @@ Channel *Server::getChannel(const std::string &name)
 {
     if (channels.find(name) == channels.end())
     {
-        std::cerr << "Channel " << name << " does not exist" << std::endl;
+        std::cerr << INFO << "Channel " << name << " does not exist" << std::endl;
         return NULL;
     }
 

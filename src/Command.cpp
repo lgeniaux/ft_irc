@@ -39,7 +39,7 @@ void CommandHandler::handleCommand(const std::string& command, int client_fd, Se
         commandRegistry[cmd](tokens, client_fd, server);
         return;
     }
-    std::cerr << "Unknown command: " << cmd << std::endl;
+    std::cerr << WARN << "Unknown command: " << cmd << std::endl;
     return;
 }
 
