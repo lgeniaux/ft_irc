@@ -20,10 +20,10 @@
 
 ## Communication Phase
 - [✅] Implement basic message sending and receiving.
-- [📝] Forward messages to all clients in a channel.
+- [✅] Forward messages to all clients in a channel.
 
 ## Command Phase
-- [📝] Implement the required commands: nickname, username, join, private message, etc. 🤝 Louis
+- [✅] Implement the required commands: nickname, username, join, private message, etc. 🤝 Louis
 - [📝] Implement channel operator commands: KICK, INVITE, TOPIC, MODE. 🤝 Louis
 
 ## Concurrency Phase
