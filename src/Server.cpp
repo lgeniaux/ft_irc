@@ -269,11 +269,12 @@ Client &Server::getClient(int client_fd)
     return clients[client_fd];
 }
 
-void Server::updateNicknameMap(const std::string& oldNick, const std::string& newNick, const Client& client) {
-    if (!oldNick.empty()) {
-        nicknameToClientMap.erase(oldNick);
-    }
-    nicknameToClientMap[newNick] = client;
+void Server::updateNicknameMap(const std::string& oldNick, const std::string& newNick, Client& client) {
+  if (!oldNick.empty()) {
+    nicknameToClientMap.erase(oldNick); 
+  }
+
+  nicknameToClientMap[newNick] = &client;
 }
 
 

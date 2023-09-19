@@ -29,7 +29,7 @@ public:
     void handleChannelMessage(const std::string& channelName, const std::string& message, int sender_fd);
     void handlePrivateMessage(const std::string& recipientNick, const std::string& message, int sender_fd);
     Channel* getChannel(const std::string& name);
-    void updateNicknameMap(const std::string& oldNick, const std::string& newNick, const Client& client);
+    void updateNicknameMap(const std::string& oldNick, const std::string& newNick, Client& client);
     friend class CommandHandler;  
     
 private:
@@ -41,7 +41,7 @@ private:
     std::map<int, Client> clients;
     ssize_t readFromSocket(int client_fd, char *buffer, size_t size);
     std::map<std::string, Channel> channels; // name -> channel object
-    std::map<std::string, Client> nicknameToClientMap; // nickname -> client object
+    std::map<std::string, Client *> nicknameToClientMap; // nickname -> client object
     RFC2812Handler rfcHandler;
 };
 
