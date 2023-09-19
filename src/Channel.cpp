@@ -1,4 +1,8 @@
 #include "Channel.hpp"
+#include "RFC2812Handler.hpp"
+#include "Server.hpp"
+
+#include <iostream>
 
 Channel::Channel(const std::string& name, const std::string& topic)
     : name(name), topic(topic) {
@@ -62,4 +66,17 @@ void Channel::removeInvite(int client_fd) {
 
 bool Channel::isInvited(int client_fd) const {
     return invitedUsers.find(client_fd) != invitedUsers.end();
+}
+
+void Channel::broadcastMessageToChannel(const std::string& message, int sender_fd) {
+    std::string formattedMessage = RFC2812Handler::formatMessage(message);
+    for (std::set<int>::iterator it = users.begin(); it != users.end(); ++it) {
+        int client_fd = *it;
+        if (client_fd == sender_fd) {
+            continue;
+        }
+        send(client_fd, formattedMessage.c_str(), formattedMessage.size(), 0);
+        //debug
+        // std::cout << "Message sent to client " << client_fd << std::endl;
+    }
 }

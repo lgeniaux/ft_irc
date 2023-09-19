@@ -21,7 +21,7 @@ class CommandHandler {
         static void handleUSER(const std::vector<std::string>& tokens, int client_fd, Server& server);
         static void handleCAP(const std::vector<std::string>& tokens, int client_fd, Server& server);
         static void handleJOIN(const std::vector<std::string>& tokens, int client_fd, Server& server);
-        static void handleInvitesAfterJoin(int client_fd, Server& server, const std::string& channelName);
+        static void handlePRIVMSG(const std::vector<std::string>& tokens, int client_fd, Server& server);
 };
 
 #endif

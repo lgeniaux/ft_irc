@@ -24,7 +24,8 @@ void CommandHandler::handleCommand(const std::string& command, int client_fd, Se
     commandRegistry["PASS"] = handlePASS;
     commandRegistry["USER"] = handleUSER;
     commandRegistry["CAP"] = handleCAP;
-
+    commandRegistry["PRIVMSG"] = handlePRIVMSG;
+    
     for (; issIt != end; ++issIt) {
         tokens.push_back(*issIt);
     }

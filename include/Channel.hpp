@@ -31,6 +31,9 @@ public:
     void removeInvite(int client_fd);
     bool isInvited(int client_fd) const;
 
+    //MESSAGES
+    void broadcastMessageToChannel(const std::string& message, int sender_fd);
+
 private:
     std::string name;
     std::string topic;
