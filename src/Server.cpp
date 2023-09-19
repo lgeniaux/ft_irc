@@ -73,7 +73,7 @@ void Server::run()
 
         int activity = select(max_sd + 1, &readfds, NULL, NULL, NULL);
 
-                if ((activity < 0) && (errno != EINTR))
+        if ((activity < 0) && (errno != EINTR))
         {
             perror("select error");
         }
@@ -83,12 +83,24 @@ void Server::run()
             acceptClient();
         }
 
-        for (std::map<int, Client>::iterator it = clients.begin(); it != clients.end(); ++it)
+        std::vector<int> clients_to_remove;           // To collect clients that should be removed
+        std::map<int, Client> temp_clients = clients; // Create a temporary copy of the clients map
+
+        for (std::map<int, Client>::iterator it = temp_clients.begin(); it != temp_clients.end(); ++it)
         {
             if (FD_ISSET(it->first, &readfds))
             {
-                readFromClient(it->second);
+                if (readFromClient(clients[it->first]) == -1) // Remove client if -1 is returned
+                {
+                    clients_to_remove.push_back(it->first);
+                }
             }
+        }
+
+        // Actually remove the clients
+        for (std::vector<int>::iterator it = clients_to_remove.begin(); it != clients_to_remove.end(); ++it)
+        {
+            clients.erase(*it);
         }
     }
 }
@@ -169,14 +181,14 @@ void Server::authenticateClient(int client_fd)
     }
 }
 
-void Server::readFromClient(Client &client)
+int Server::readFromClient(Client &client)
 {
 
     if (!client.isAuthenticated())
     {
         // client is not authenticated yet, we listen to him again to get all the command (PASS, NICK, USER)
         authenticateClient(client.getFd());
-        return;
+        return 0;
     }
     else
     {
@@ -186,7 +198,8 @@ void Server::readFromClient(Client &client)
         ssize_t bytes_read = readFromSocket(client_fd, buffer, sizeof(buffer));
         if (bytes_read <= 0)
         {
-            return;
+            close(client_fd);
+            return -1;
         }
 
         std::string message(buffer, bytes_read);
@@ -206,6 +219,7 @@ void Server::readFromClient(Client &client)
         {
             std::cout << "Client socket is closed" << std::endl;
         }
+        return 0;
     }
 }
 
@@ -262,17 +276,20 @@ void Server::leaveChannel(const std::string &name, int client_fd)
     }
 }
 
-void Server::handleChannelMessage(const std::string& channelName, const std::string& message, int sender_fd) {
+void Server::handleChannelMessage(const std::string &channelName, const std::string &message, int sender_fd)
+{
     // DEBUG
     // std::cout << "Handling channel message" << std::endl;
     // std::cout << "Channel name: " << channelName << std::endl;
     // std::cout << "Message: " << message << std::endl;
     // list all existing channel for debug
     // std::cout << "Existing channels: " << std::endl;
-    for (std::map<std::string, Channel>::iterator it = channels.begin(); it != channels.end(); ++it) {
+    for (std::map<std::string, Channel>::iterator it = channels.begin(); it != channels.end(); ++it)
+    {
         std::cout << it->first << std::endl;
     }
-    if (channels.find(channelName) != channels.end()) {
+    if (channels.find(channelName) != channels.end())
+    {
         channels[channelName].broadcastMessageToChannel(message, sender_fd);
         // std::cout << "Message broadcasted" << std::endl;
     }
@@ -296,12 +313,12 @@ Client &Server::getClient(int client_fd)
     return clients[client_fd];
 }
 
-void Server::updateNicknameMap(const std::string& oldNick, const std::string& newNick, Client& client) {
-  if (!oldNick.empty()) {
-    nicknameToClientMap.erase(oldNick); 
-  }
+void Server::updateNicknameMap(const std::string &oldNick, const std::string &newNick, Client &client)
+{
+    if (!oldNick.empty())
+    {
+        nicknameToClientMap.erase(oldNick);
+    }
 
-  nicknameToClientMap[newNick] = &client;
+    nicknameToClientMap[newNick] = &client;
 }
-
-

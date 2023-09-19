@@ -32,7 +32,7 @@ public:
     void run();
     void acceptClient();
     void authenticateClient(int client_fd);
-    void readFromClient(Client& client);
+    int readFromClient(Client& client);
     void broadcastMessage(const std::string& message, int sender_fd);
     Client& getClient(int client_fd);
     // Channel methods
