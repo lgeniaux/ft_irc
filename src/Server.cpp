@@ -179,15 +179,6 @@ void Server::readFromClient(Client &client)
         commandHandler->handleCommand(message, client_fd, *this);
 
         std::cout << "Received message: " << message << std::endl;
-        broadcastMessage(message, client_fd);
-        if (clients.find(client_fd) != clients.end())
-        {
-            std::cout << "Client socket is still open" << std::endl;
-        }
-        else
-        {
-            std::cout << "Client socket is closed" << std::endl;
-        }
     }
 }
 
@@ -244,22 +235,22 @@ void Server::leaveChannel(const std::string &name, int client_fd)
     }
 }
 
-void Server::broadcastToChannel(const std::string &message, const std::string &channelName, int sender_fd)
-{
-    std::map<std::string, Channel>::iterator it = channels.find(channelName);
-    if (it != channels.end())
-    {
-        Channel &channel = it->second;
-        std::set<int> users = channel.getUsers();
-        for (std::set<int>::iterator userIt = users.begin(); userIt != users.end(); ++userIt)
-        {
-            int client_fd = *userIt;
-            if (client_fd != sender_fd)
-            {
-                send(client_fd, message.c_str(), message.size(), 0);
-            }
-        }
+void Server::handleChannelMessage(const std::string& channelName, const std::string& message, int sender_fd) {
+    // DEBUG
+    // std::cout << "Handling channel message" << std::endl;
+    // std::cout << "Channel name: " << channelName << std::endl;
+    // std::cout << "Message: " << message << std::endl;
+    // list all existing channel for debug
+    // std::cout << "Existing channels: " << std::endl;
+    for (std::map<std::string, Channel>::iterator it = channels.begin(); it != channels.end(); ++it) {
+        std::cout << it->first << std::endl;
     }
+    if (channels.find(channelName) != channels.end()) {
+        channels[channelName].broadcastMessageToChannel(message, sender_fd);
+        // std::cout << "Message broadcasted" << std::endl;
+    }
+    else
+        std::cout << "Channel does not exist" << std::endl;
 }
 
 Channel *Server::getChannel(const std::string &name)
@@ -277,3 +268,12 @@ Client &Server::getClient(int client_fd)
 {
     return clients[client_fd];
 }
+
+void Server::updateNicknameMap(const std::string& oldNick, const std::string& newNick, const Client& client) {
+    if (!oldNick.empty()) {
+        nicknameToClientMap.erase(oldNick);
+    }
+    nicknameToClientMap[newNick] = client;
+}
+
+

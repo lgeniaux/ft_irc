@@ -23,6 +23,7 @@ SRC_FILE := INVITE.cpp \
 			USER.cpp \
 			TOPIC.cpp \
 			CAP.cpp \
+			PRIVMSG.cpp \
 
 OBJ_FILE := $(SRC_FILE:.cpp=.o)
 OBJ = $(addprefix $(DIR_OBJ)/, $(OBJ_FILE))
