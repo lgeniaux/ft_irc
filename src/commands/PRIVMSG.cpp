@@ -27,12 +27,14 @@ void CommandHandler::handlePRIVMSG(const std::vector<std::string> &tokens, int c
     //           << "\"" << target << "\"" << std::endl;
     // std::cout << "message: " << message << std::endl;
 
+    // Get the sender's nickname
+    std::string sender_nick = server.getClient(client_fd).getNickname();
     // Craft the message (:Nick!User@Host PRIVMSG #channel/user :message) User and Host seem to be optional
     std::string newMessage = ":" + server.getClient(client_fd).getNickname() + " PRIVMSG " + target + " " + message;
     if (target[0] == '#')
     {
         // Channel message
-        server.handleChannelMessage(target, newMessage, client_fd);
+        server.handleChannelMessage(target, newMessage, sender_nick);
     }
     else
     {

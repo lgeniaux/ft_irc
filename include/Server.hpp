@@ -37,13 +37,15 @@ public:
     Client& getClient(int client_fd);
     // Channel methods
     void createChannel(const std::string& name);
-    void joinChannel(const std::string& name, int client_fd);
-    void leaveChannel(const std::string& name, int client_fd);
-    void handleChannelMessage(const std::string& channelName, const std::string& message, int sender_fd);
+    void joinChannel(const std::string &name, std::string nickname);
+    void leaveChannel(const std::string &name, std::string nickname);
+    void handleChannelMessage(const std::string& channelName, const std::string& message, const std::string senderNick);
     void handlePrivateMessage(const std::string& recipientNick, const std::string& message, int sender_fd);
     Channel* getChannel(const std::string& name);
     void updateNicknameMap(const std::string& oldNick, const std::string& newNick, Client& client);
     friend class CommandHandler;  
+    int getFdFromNickname(const std::string& nickname);
+
     
 private:
     int port;

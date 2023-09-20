@@ -5,42 +5,44 @@
 #include <set>
 #include <map>
 
-class Channel {
+class Server;
+
+class Channel
+{
 public:
     Channel() {}
-    Channel(const std::string& name, const std::string& topic = "");
+    Channel(const std::string &name, const std::string &topic = "");
 
-    const std::string& getName() const;
-    const std::string& getTopic() const;
-    void setTopic(const std::string& newTopic);
+    const std::string &getName() const;
+    const std::string &getTopic() const;
+    void setTopic(const std::string &newTopic);
 
-    void addUser(int client_fd);
-    void removeUser(int client_fd);
-    bool hasUser(int client_fd) const;
+    void addUser(std::string nickname);
+    void removeUser(std::string nickname);
+    bool hasUser(std::string nickname) const;
 
-    void addOperator(int client_fd);
-    void removeOperator(int client_fd);
-    bool isOperator(int client_fd) const;
+    void addOperator(std::string nickname);
+    void removeOperator(std::string nickname);
+    bool isOperator(std::string nickname) const;
 
     void setMode(char mode, bool enabled);
     bool getMode(char mode) const;
 
-    std::set<int> getUsers() const;
 
-    void inviteUser(int client_fd);
-    void removeInvite(int client_fd);
-    bool isInvited(int client_fd) const;
+    void inviteUser(std::string nickname);
+    void removeInvite(std::string nickname);
+    bool isInvited(std::string nickname) const;
 
-    //MESSAGES
-    void broadcastMessageToChannel(const std::string& message, int sender_fd);
+    // MESSAGES
+    void broadcastMessageToChannel(const std::string& message, Server& server, const std::string& sender);
 
 private:
     std::string name;
     std::string topic;
-    std::set<int> users;
-    std::set<int> operators;
+    std::set<std::string> users;
+    std::set<std::string> operators;
+    std::set<std::string> invitedUsers;
     std::map<char, bool> modes; // 'i', 't', 'k', 'o', 'l' ...
-    std::set<int> invitedUsers;
 };
 
 #endif // CHANNEL_HPP

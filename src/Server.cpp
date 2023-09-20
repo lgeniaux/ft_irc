@@ -101,6 +101,8 @@ void Server::run()
         for (std::vector<int>::iterator it = clients_to_remove.begin(); it != clients_to_remove.end(); ++it)
         {
             clients.erase(*it);
+            std::string oldNick = clients[*it].getNickname();
+            nicknameToClientMap.erase(oldNick);
         }
     }
 }
@@ -255,28 +257,28 @@ void Server::createChannel(const std::string &name)
     channels[name] = Channel(name);
 }
 
-void Server::joinChannel(const std::string &name, int client_fd)
+void Server::joinChannel(const std::string &name, std::string nickname)
 {
     if (channels.find(name) == channels.end())
     {
         // In most IRC servers if a user tries to join an unexisting channel, it is created. The user is also made operator of the channel.
         createChannel(name);
-        channels[name].addOperator(client_fd);
+        channels[name].addOperator(nickname);
     }
-    channels[name].addUser(client_fd);
+    channels[name].addUser(nickname);
     // send a RFC2812 message to the client to inform him that he joined the channel
-    RFC2812Handler::sendResponse(332, clients[client_fd], name);
+    RFC2812Handler::sendResponse(332, getClient(getFdFromNickname(nickname)), name + " :" + channels[name].getTopic());
 }
 
-void Server::leaveChannel(const std::string &name, int client_fd)
+void Server::leaveChannel(const std::string &name, std::string nickname)
 {
     if (channels.find(name) != channels.end())
     {
-        channels[name].removeUser(client_fd);
+        channels[name].removeUser(nickname);
     }
 }
 
-void Server::handleChannelMessage(const std::string &channelName, const std::string &message, int sender_fd)
+void Server::handleChannelMessage(const std::string &channelName, const std::string &message, std::string senderNick)
 {
     // DEBUG
     // std::cout << "Handling channel message" << std::endl;
@@ -290,7 +292,7 @@ void Server::handleChannelMessage(const std::string &channelName, const std::str
     }
     if (channels.find(channelName) != channels.end())
     {
-        channels[channelName].broadcastMessageToChannel(message, sender_fd);
+        channels[channelName].broadcastMessageToChannel(message, *this, senderNick);
         // std::cout << "Message broadcasted" << std::endl;
     }
     else
@@ -321,4 +323,11 @@ void Server::updateNicknameMap(const std::string &oldNick, const std::string &ne
     }
 
     nicknameToClientMap[newNick] = &client;
+}
+
+int Server::getFdFromNickname(const std::string& nickname) {
+    if(nicknameToClientMap.find(nickname) != nicknameToClientMap.end()) {
+        return nicknameToClientMap[nickname]->getFd();
+    }
+    return -1;
 }

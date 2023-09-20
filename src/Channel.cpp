@@ -20,28 +20,28 @@ void Channel::setTopic(const std::string& newTopic) {
     topic = newTopic;
 }
 
-void Channel::addUser(int client_fd) {
-    users.insert(client_fd);
+void Channel::addUser(std::string nickname) {
+    users.insert(nickname);
 }
 
-void Channel::removeUser(int client_fd) {
-    users.erase(client_fd);
+void Channel::removeUser(std::string nickname) {
+    users.erase(nickname);
 }
 
-bool Channel::hasUser(int client_fd) const {
-    return users.find(client_fd) != users.end();
+bool Channel::hasUser(std::string nickname) const {
+    return users.find(nickname) != users.end();
 }
 
-void Channel::addOperator(int client_fd) {
-    operators.insert(client_fd);
+void Channel::addOperator(std::string nickname) {
+    operators.insert(nickname);
 }
 
-void Channel::removeOperator(int client_fd) {
-    operators.erase(client_fd);
+void Channel::removeOperator(std::string nickname) {
+    operators.erase(nickname);
 }
 
-bool Channel::isOperator(int client_fd) const {
-    return operators.find(client_fd) != operators.end();
+bool Channel::isOperator(std::string nickname) const {
+    return operators.find(nickname) != operators.end();
 }
 
 void Channel::setMode(char mode, bool enabled) {
@@ -52,31 +52,29 @@ bool Channel::getMode(char mode) const {
     return modes.find(mode) != modes.end() ? modes.at(mode) : false;
 }
 
-std::set<int> Channel::getUsers() const {
-    return users;
+
+void Channel::inviteUser(std::string nickname) {
+    invitedUsers.insert(nickname);
 }
 
-void Channel::inviteUser(int client_fd) {
-    invitedUsers.insert(client_fd);
+void Channel::removeInvite(std::string nickname) {
+    invitedUsers.erase(nickname);
 }
 
-void Channel::removeInvite(int client_fd) {
-    invitedUsers.erase(client_fd);
+bool Channel::isInvited(std::string nickname) const {
+    return invitedUsers.find(nickname) != invitedUsers.end();
 }
 
-bool Channel::isInvited(int client_fd) const {
-    return invitedUsers.find(client_fd) != invitedUsers.end();
-}
-
-void Channel::broadcastMessageToChannel(const std::string& message, int sender_fd) {
-    std::string formattedMessage = RFC2812Handler::formatMessage(message);
-    for (std::set<int>::iterator it = users.begin(); it != users.end(); ++it) {
-        int client_fd = *it;
-        if (client_fd == sender_fd) {
+void Channel::broadcastMessageToChannel(const std::string& message, Server& server, const std::string& sender) {
+    std::set<std::string>::iterator it;
+    for (it = users.begin(); it != users.end(); ++it) {
+        if (*it == sender) {
             continue;
         }
-        send(client_fd, formattedMessage.c_str(), formattedMessage.size(), 0);
-        //debug
-        // std::cout << "Message sent to client " << client_fd << std::endl;
+        std::string nickname = *it;
+        int fd = server.getFdFromNickname(nickname);
+        if (fd != -1) { // Check if fd is valid
+            send(fd, message.c_str(), message.length(), 0);
+        }
     }
 }
