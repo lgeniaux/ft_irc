@@ -22,11 +22,13 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
     // list of supported modes
     std::vector<char> supportedModes = {'i', 't', 'k', 'o', 'l'};
 
+    // Irssi sends '+' by default (if channelname contains # on input), so the check is not necessary but I'll leave it here
     if (modeSign != '+' && modeSign != '-')
     {
         rfcHandler.sendResponse(461, server.getClient(client_fd), "MODE :Invalid mode");
         return;
     }
+
     // For the moment we do not support multiple modes at once (isn't ask in the subject either)
     if (mode.size() > 2)
     {
@@ -85,11 +87,13 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
             }
             channel->setKey(tokens[3]);
             channel->setMode(mode[1], modeSign == '+');
+            rfcHandler.sendResponse(324, server.getClient(client_fd), channelName + " +" + mode[1] + " " + tokens[3]);
         }
         else
         {
             channel->setKey("");
             channel->setMode(mode[1], modeSign == '-');
+            rfcHandler.sendResponse(324, server.getClient(client_fd), channelName + " +" + mode[1] + " " + tokens[3]);
         }
     }
     else if (mode[1] == 'l')
@@ -103,11 +107,13 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
             }
             channel->setLimit(std::stoi(tokens[3]));
             channel->setMode(mode[1], modeSign == '+');
+            rfcHandler.sendResponse(324, server.getClient(client_fd), channelName + " +" + mode[1] + " " + tokens[3]);
         }
         else
         {
             channel->setLimit(0);
             channel->setMode(mode[1], modeSign == '-');
+            rfcHandler.sendResponse(324, server.getClient(client_fd), channelName + " +" + mode[1] + " " + tokens[3]);
         }
     }
     else if (mode[1] == 'o')
@@ -125,5 +131,6 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
     else if (mode[1] == 'i' || mode[1] == 't')
     {
         channel->setMode(mode[1], modeSign == '+');
+        rfcHandler.sendResponse(324, server.getClient(client_fd), channelName + modeSign + mode[1]);
     }
 }

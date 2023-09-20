@@ -61,10 +61,14 @@ void Channel::setMode(char mode, bool enabled)
 
 bool Channel::getMode(char mode) const
 {
-    if (modes.find(mode) != modes.end())
-        return true;
-    return false;
+    std::map<char, bool>::const_iterator it = modes.find(mode);
+    if (it != modes.end())
+    {
+        return it->second; 
+    }
+    return false; 
 }
+
 
 void Channel::inviteUser(std::string nickname)
 {
