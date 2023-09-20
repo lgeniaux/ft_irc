@@ -78,3 +78,7 @@ void Channel::broadcastMessageToChannel(const std::string& message, Server& serv
         }
     }
 }
+
+bool Channel::isInChannel(std::string nickname) const {
+    return users.find(nickname) != users.end();
+}

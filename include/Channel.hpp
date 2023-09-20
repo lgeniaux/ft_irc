@@ -28,6 +28,7 @@ public:
     void setMode(char mode, bool enabled);
     bool getMode(char mode) const;
 
+    bool isInChannel(std::string nickname) const;
 
     void inviteUser(std::string nickname);
     void removeInvite(std::string nickname);
