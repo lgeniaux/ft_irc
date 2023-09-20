@@ -100,9 +100,9 @@ void Server::run()
         // Actually remove the clients
         for (std::vector<int>::iterator it = clients_to_remove.begin(); it != clients_to_remove.end(); ++it)
         {
-            clients.erase(*it);
             std::string oldNick = clients[*it].getNickname();
             nicknameToClientMap.erase(oldNick);
+            clients.erase(*it);
         }
     }
 }
@@ -271,14 +271,10 @@ void Server::handleChannelMessage(const std::string &channelName, const std::str
     // std::cout << "Message: " << message << std::endl;
     // list all existing channel for debug
     // std::cout << "Existing channels: " << std::endl;
-    for (std::map<std::string, Channel>::iterator it = channels.begin(); it != channels.end(); ++it)
-    {
-        std::cout << it->first << std::endl;
-    }
     if (channels.find(channelName) != channels.end())
     {
         channels[channelName].broadcastMessageToChannel(message, *this, senderNick);
-        // std::cout << "Message broadcasted" << std::endl;
+        std::cout << "Message broadcasted to channel" << channelName << std::endl;
     }
     else
         std::cout << "Channel does not exist" << std::endl;
