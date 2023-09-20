@@ -33,7 +33,6 @@ public:
     void acceptClient();
     void authenticateClient(int client_fd);
     int readFromClient(Client& client);
-    void broadcastMessage(const std::string& message, int sender_fd);
     Client& getClient(int client_fd);
     // Channel methods
     void createChannel(const std::string& name);

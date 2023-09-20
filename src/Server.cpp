@@ -212,7 +212,6 @@ int Server::readFromClient(Client &client)
         while (debugMessage.find("\r\n") != std::string::npos)
             debugMessage.replace(debugMessage.find("\r\n"), 2, LIGHT PURPLE "\\r\\n" RESET);
         std::cout << LIGHT GRAY << "Received message: " << RESET << debugMessage << std::endl;
-        broadcastMessage(message, client_fd);
         if (clients.find(client_fd) != clients.end())
         {
             std::cout << LIGHT GRAY << "Client socket is still open" << std::endl;
@@ -222,20 +221,6 @@ int Server::readFromClient(Client &client)
             std::cout << "Client socket is closed" << std::endl;
         }
         return 0;
-    }
-}
-
-void Server::broadcastMessage(const std::string &message, int sender_fd)
-{
-    std::string formattedMessage = RFC2812Handler::formatMessage(message);
-    for (std::map<int, Client>::iterator it = clients.begin(); it != clients.end(); ++it)
-    {
-        int client_fd = it->first;
-        if (client_fd == sender_fd)
-        {
-            continue;
-        }
-        send(client_fd, formattedMessage.c_str(), formattedMessage.size(), 0);
     }
 }
 
