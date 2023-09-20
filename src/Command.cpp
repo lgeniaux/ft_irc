@@ -35,7 +35,7 @@ void CommandHandler::handleCommand(const std::string& command, int client_fd, Se
     }
 
     std::string cmd = tokens[0];
-
+    std::cout << INFO << "Received command: " << cmd << std::endl;
     if (commandRegistry.find(cmd) != commandRegistry.end()) {
         commandRegistry[cmd](tokens, client_fd, server);
         return;
