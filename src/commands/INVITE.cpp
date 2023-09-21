@@ -66,6 +66,11 @@ void CommandHandler::handleINVITE(const std::vector<std::string>& tokens, int cl
     std::string formattedMessage = ":" + server.getClient(client_fd).getNickname() + " INVITE " + recipientNickname + " " + channelName;
     send(recipient_fd, formattedMessage.c_str(), formattedMessage.length(), 0);
 
+    //Make the recipient join the channel (This workaround is necesary because Irssi do weird things so inviteUser may not be used at all)
+    server.joinChannel(channelName, recipientNickname);
+    channel->removeInvite(recipientNickname);
+
+
     //RPL_INVITING (341) - sent to the client who sent the invite
     rfcHandler.sendResponse(341, server.getClient(client_fd), channelName + " " + recipientNickname);
 }

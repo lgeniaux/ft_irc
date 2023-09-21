@@ -3,6 +3,29 @@
 #include "Server.hpp"
 #include "RFC2812Handler.hpp"
 
+
+void sendJoinSuccessInfo(Server& server, const std::string& channelName, int client_fd) {
+    RFC2812Handler rfcHandler;
+    Channel* channel = server.getChannel(channelName);
+    if (!channel) {
+        return;
+    }
+    
+    // Send the topic of the channel
+    if (!channel->getTopic().empty()) {
+        rfcHandler.sendResponse(332, server.getClient(client_fd), channelName + " :" + channel->getTopic());
+    }
+
+    // Send the names list
+    std::set<std::string> users = channel->getUsers();
+    std::string namesList;
+    for (const std::string& nickname : users) {
+        namesList += nickname + " ";
+    }
+    rfcHandler.sendResponse(353, server.getClient(client_fd), "=" + channelName + " :" + namesList);
+    rfcHandler.sendResponse(366, server.getClient(client_fd), channelName + " :End of NAMES list");
+}
+
 void CommandHandler::handleJOIN(const std::vector<std::string> &tokens, int client_fd, Server &server)
 {
     RFC2812Handler rfcHandler; // Initialize here
@@ -33,7 +56,9 @@ void CommandHandler::handleJOIN(const std::vector<std::string> &tokens, int clie
 
     if (channel == NULL)
     {
+        // Channel does not exist, create it
         server.joinChannel(channelName, clientNickname);
+        sendJoinSuccessInfo(server, channelName, client_fd);
     }
     else if (channel->getMode('i') && !channel->isInvited(clientNickname))
     {
@@ -43,6 +68,7 @@ void CommandHandler::handleJOIN(const std::vector<std::string> &tokens, int clie
     else if (!channel->isInChannel(clientNickname))
     {
         server.joinChannel(channelName, clientNickname);
+        sendJoinSuccessInfo(server, channelName, client_fd);
         std::cout << "User " << clientNickname << " joined channel " << channelName << std::endl;
 
         channel = server.getChannel(channelName); // Refresh the channel pointer

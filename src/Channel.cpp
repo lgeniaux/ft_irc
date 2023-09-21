@@ -135,3 +135,8 @@ int Channel::getLimit() const
 {
     return limit;
 }
+
+std::set<std::string> Channel::getUsers() const
+{
+    return users;
+}

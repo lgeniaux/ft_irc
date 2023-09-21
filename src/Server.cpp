@@ -33,6 +33,14 @@ void Server::run()
         return;
     }
 
+    // Prevent "Bind failed" error message because of socket in TIME_WAIT state
+    int opt = 1;
+    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) {
+        std::cerr << "Failed to set socket option SO_REUSEADDR" << std::endl;
+        close(server_fd);
+        return;
+    }
+
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(port);
