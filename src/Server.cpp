@@ -251,7 +251,7 @@ void Server::joinChannel(const std::string &name, std::string nickname)
         channels[name].addOperator(nickname);
     }
     channels[name].addUser(nickname);
-    // send a RFC2812 message to the client to inform him that he joined the channel
+    std::cout << "User " << nickname << " joined channel " << name << std::endl;
     RFC2812Handler::sendResponse(332, getClient(getFdFromNickname(nickname)), name + " :" + channels[name].getTopic());
 }
 

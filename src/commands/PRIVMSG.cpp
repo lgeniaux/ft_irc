@@ -33,6 +33,12 @@ void CommandHandler::handlePRIVMSG(const std::vector<std::string> &tokens, int c
     std::string newMessage = rfcHandler.formatMessage(":" + server.getClient(client_fd).getNickname() + " PRIVMSG " + target + " " + message);
     if (target[0] == '#')
     {
+        //check if user is in channel
+        if (!server.getChannel(target)->isInChannel(sender_nick))
+        {
+            RFC2812Handler::sendResponse(442, server.getClient(client_fd), target + " :You're not on that channel");
+            return;
+        }
         // Channel message
         server.handleChannelMessage(target, newMessage, sender_nick);
     }
