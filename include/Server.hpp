@@ -10,19 +10,6 @@
 #include "Channel.hpp"
 #include "RFC2812Handler.hpp"
 
-#define BOLD	"\033[1m"
-#define LIGHT	"\033[2m"
-#define GRAY	"\033[90m"
-#define RED		"\033[31m"
-#define PURPLE	"\033[35m"
-#define CYAN	"\033[36m"
-#define GREEN	"\033[32m"
-#define RESET	"\033[0m"
-
-# define ERROR	BOLD RED "[Error] " RESET
-# define WARN	BOLD PURPLE "[Warning] " RESET
-# define INFO	BOLD CYAN "[Info] " RESET
-
 class CommandHandler;
 
 class Server {

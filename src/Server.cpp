@@ -143,8 +143,10 @@ void Server::authenticateClient(int client_fd)
     std::cout << LIGHT GRAY << "[" << client_fd - 3 << "] Authenticating client" << RESET << std::endl;
     // debug print the data the user is sending
     std::string debugMessage = completeMessage;
-    while (debugMessage.find("\r\n") != std::string::npos)
-        debugMessage.replace(debugMessage.find("\r\n"), 2, LIGHT PURPLE "\\r\\n" RESET);
+    while (debugMessage.find("\r") != std::string::npos)
+        debugMessage.replace(debugMessage.find("\r"), 1, LIGHT PURPLE "\\r" RESET);
+    while (debugMessage.find("\n") != std::string::npos)
+        debugMessage.replace(debugMessage.find("\n"), 1, LIGHT PURPLE "\\n" RESET);
     std::cout << LIGHT GRAY << "[" << client_fd - 3 << "] Data received : " << RESET << debugMessage << std::endl;
 
     while (std::getline(f, line))
@@ -209,8 +211,10 @@ int Server::readFromClient(Client &client)
         commandHandler->handleCommand(message, client_fd, *this);
 
         std::string debugMessage = message;
-        while (debugMessage.find("\r\n") != std::string::npos)
-            debugMessage.replace(debugMessage.find("\r\n"), 2, LIGHT PURPLE "\\r\\n" RESET);
+        while (debugMessage.find("\r") != std::string::npos)
+            debugMessage.replace(debugMessage.find("\r"), 1, LIGHT PURPLE "\\r" RESET);
+        while (debugMessage.find("\n") != std::string::npos)
+            debugMessage.replace(debugMessage.find("\n"), 1, LIGHT PURPLE "\\n" RESET);
         std::cout << LIGHT GRAY << "Received message: " << RESET << debugMessage << std::endl;
         if (clients.find(client_fd) != clients.end())
         {

@@ -5,11 +5,14 @@
 
 void RFC2812Handler::sendInitialConnectionMessages(Client& client) {
     int fd = client.getFd();
-    std::ostringstream oss;
-    oss << ":localhost 001 " << client.getNickname() 
-        << " :Welcome to the Internet Relay Network " << client.getNickname() 
-        << "!" << client.getUsername() << "@" << inet_ntoa(client.getAddress().sin_addr);
-    std::string welcomeMessage = formatMessage(oss.str());
+    std::string welcomeMessage = ":localhost 001 " + client.getNickname() + " :" + WELCOME_MSG;
+    if (welcomeMessage.find("${NAME}") != std::string::npos)
+        welcomeMessage.replace(welcomeMessage.find("${NAME}"), 7, client.getNickname());
+    if (welcomeMessage.find("${USER}") != std::string::npos)
+        welcomeMessage.replace(welcomeMessage.find("${USER}"), 7, client.getUsername());
+    if (welcomeMessage.find("${HOST}") != std::string::npos)
+        welcomeMessage.replace(welcomeMessage.find("${HOST}"), 7, inet_ntoa(client.getAddress().sin_addr));
+    welcomeMessage = formatMessage(welcomeMessage);
     send(fd, welcomeMessage.c_str(), welcomeMessage.size(), 0);
 }
 
