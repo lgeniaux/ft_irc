@@ -2,6 +2,7 @@
 #include <sstream>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <iostream>
 
 void RFC2812Handler::sendInitialConnectionMessages(Client& client) {
     int fd = client.getFd();
@@ -20,9 +21,12 @@ void RFC2812Handler::sendInitialConnectionMessages(Client& client) {
 void RFC2812Handler::sendResponse(int code, Client& client, const std::string& message) {
     int fd = client.getFd();
     std::ostringstream oss;
-    oss << ":" << code << " " << client.getNickname() << " " << message;
+    oss << ": " << code << " " << client.getNickname() << " " << message;
     std::string formattedMessage = formatMessage(oss.str());
     send(fd, formattedMessage.c_str(), formattedMessage.size(), 0);
+    while (formattedMessage.back() == '\r' || formattedMessage.back() == '\n')
+        formattedMessage.pop_back();
+    std::cout << LIGHT GRAY << "Sending response: \"" << RESET << formattedMessage << "\"" << std::endl;
 }
 
 std::string RFC2812Handler::formatMessage(const std::string& message) {
