@@ -37,10 +37,13 @@ void Server::run()
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(port);
 
-    if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
+    int tries = 0;
+    while (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
     {
-        std::cerr << ERROR << "Bind failed" << std::endl;
-        return;
+        std::cerr << ERROR << "Bind failed " << tries << "/30" << std::endl;
+        usleep(1000000);
+        if (tries++ >= 30)
+            return;
     }
 
     if (listen(server_fd, 3) < 0)
@@ -207,23 +210,16 @@ int Server::readFromClient(Client &client)
         }
 
         std::string message(buffer, bytes_read);
-        // handle message as command
-        commandHandler->handleCommand(message, client_fd, *this);
-
         std::string debugMessage = message;
         while (debugMessage.find("\r") != std::string::npos)
             debugMessage.replace(debugMessage.find("\r"), 1, LIGHT PURPLE "\\r" RESET);
         while (debugMessage.find("\n") != std::string::npos)
             debugMessage.replace(debugMessage.find("\n"), 1, LIGHT PURPLE "\\n" RESET);
         std::cout << LIGHT GRAY << "Received message: " << RESET << debugMessage << std::endl;
-        if (clients.find(client_fd) != clients.end())
-        {
-            std::cout << LIGHT GRAY << "Client socket is still open" << std::endl;
-        }
-        else
-        {
-            std::cout << "Client socket is closed" << std::endl;
-        }
+
+        // handle message as command
+        commandHandler->handleCommand(message, client_fd, *this);
+
         return 0;
     }
 }
@@ -256,7 +252,11 @@ void Server::joinChannel(const std::string &name, std::string nickname)
     }
     channels[name].addUser(nickname);
     // send a RFC2812 message to the client to inform him that he joined the channel
-    RFC2812Handler::sendResponse(332, getClient(getFdFromNickname(nickname)), name + " :" + channels[name].getTopic());
+    if (!channels[name].getTopic().empty()){
+        RFC2812Handler::sendResponse(332, getClient(getFdFromNickname(nickname)), name + " " + channels[name].getTopic());
+        RFC2812Handler::sendResponse(333, getClient(getFdFromNickname(nickname)), name + " " + nickname + " " + std::to_string(channels[name].getTopicTime()));
+    }
+    channels[name].broadcastMessageToChannel(":" + nickname + " JOIN :" + name + "\r\n", *this, nickname);
 }
 
 void Server::leaveChannel(const std::string &name, std::string nickname)
@@ -284,6 +284,13 @@ void Server::handleChannelMessage(const std::string &channelName, const std::str
         std::cout << "Channel does not exist" << std::endl;
 }
 
+/**
+ * @brief Returns a pointer to the channel with the given name.
+ * If the channel does not exist, returns NULL.
+ * 
+ * @param name: The name of the channel to get
+ * @return Channel*
+ */
 Channel *Server::getChannel(const std::string &name)
 {
     if (channels.find(name) == channels.end())

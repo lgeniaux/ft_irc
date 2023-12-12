@@ -4,8 +4,8 @@
 
 #include <iostream>
 
-Channel::Channel(const std::string &name, const std::string &topic)
-    : name(name), topic(topic)
+Channel::Channel(const std::string &name, const std::string &topic, const std::time_t &topicTime)
+    : name(name), topic(topic), topicTime(topicTime)
 {
 }
 
@@ -19,9 +19,19 @@ const std::string &Channel::getTopic() const
     return topic;
 }
 
+const std::time_t &Channel::getTopicTime() const
+{
+    return topicTime;
+}
+
 void Channel::setTopic(const std::string &newTopic)
 {
     topic = newTopic;
+}
+
+void Channel::setTopicTime(const std::time_t &newTopicTime)
+{
+    topicTime = newTopicTime;
 }
 
 void Channel::addUser(std::string nickname)

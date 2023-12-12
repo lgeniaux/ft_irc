@@ -11,11 +11,13 @@ class Channel
 {
 public:
     Channel() {}
-    Channel(const std::string &name, const std::string &topic = "");
+    Channel(const std::string &name, const std::string &topic = "", const std::time_t &topicTime = 0);
 
     const std::string &getName() const;
     const std::string &getTopic() const;
+    const std::time_t &getTopicTime() const;
     void setTopic(const std::string &newTopic);
+    void setTopicTime(const std::time_t &newTopicTime);
 
     void addUser(std::string nickname);
     void removeUser(std::string nickname);
@@ -40,6 +42,7 @@ public:
 private:
     std::string name;
     std::string topic;
+    time_t topicTime;
     std::set<std::string> users;
     std::set<std::string> operators;
     std::set<std::string> invitedUsers;
