@@ -47,19 +47,6 @@ void CommandHandler::handleJOIN(const std::vector<std::string> &tokens, int clie
         return;
     }
 
-    if (channel != NULL)
-    {
-        // Debug Channel mode and invite status
-        std::cout << "Channel mode: " << channel->getMode('i') << std::endl;
-        std::cout << "Channel invite status: " << channel->isInvited(clientNickname) << std::endl;
-        // Debug Channel key and key status
-        std::cout << "Channel key: " << channel->checkKey(tokens[2]) << std::endl;
-        std::cout << "Channel key status: " << channel->getMode('k') << std::endl;
-
-        //Debug client command arguments
-        std::cout << "Client command arguments: " << tokens[1] << " " << tokens[2] << std::endl;
-    }
-
     if (channel == NULL)
     {
         // Channel does not exist, create it
@@ -82,7 +69,7 @@ void CommandHandler::handleJOIN(const std::vector<std::string> &tokens, int clie
     {
         server.joinChannel(channelName, clientNickname);
         sendJoinSuccessInfo(server, channelName, client_fd);
-        std::cout << "User " << clientNickname << " joined channel " << channelName << std::endl;
+        std::cout << clientNickname << " joined channel " << channelName << std::endl;
 
         channel = server.getChannel(channelName); // Refresh the channel pointer
         if (channel != NULL && channel->isInvited(clientNickname))

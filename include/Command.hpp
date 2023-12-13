@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <ctime>
 #include <iostream>
 #include "Server.hpp"
 #include "RFC2812Handler.hpp"
@@ -22,6 +23,7 @@ class CommandHandler {
         static void handleCAP(const std::vector<std::string>& tokens, int client_fd, Server& server);
         static void handleJOIN(const std::vector<std::string>& tokens, int client_fd, Server& server);
         static void handlePRIVMSG(const std::vector<std::string>& tokens, int client_fd, Server& server);
+        static void handlePART(const std::vector<std::string>& tokens, int client_fd, Server& server);
 };
 
 #endif

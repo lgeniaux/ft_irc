@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <algorithm>
 #include <sstream>
+#include <fcntl.h>
 #include "Command.hpp"
 #include "RFC2812Handler.hpp"
 
@@ -40,15 +41,41 @@ void Server::run()
         close(server_fd);
         return;
     }
+    // Set SO_REUSEADDR to allow immediate reuse of the port and avoid the "Address already in use" error
+    int opt = 1;
+    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
+    {
+        std::cerr << ERROR << "Failed to set SO_REUSEADDR" << std::endl;
+        close(server_fd);
+        return;
+    }
+
+    // Set the server socket to non-blocking
+    int flags = fcntl(server_fd, F_GETFL, 0);
+    if (flags < 0)
+    {
+        std::cerr << ERROR << "Failed to get flags for socket" << std::endl;
+        return;
+    }
+
+    flags |= O_NONBLOCK;
+    if (fcntl(server_fd, F_SETFL, flags) < 0)
+    {
+        std::cerr << ERROR << "Failed to set server socket to non-blocking" << std::endl;
+        return;
+    }
 
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(port);
 
-    if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
+    int tries = 0;
+    while (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
     {
-        std::cerr << ERROR << "Bind failed" << std::endl;
-        return;
+        std::cerr << ERROR << "Bind failed " << tries << "/30" << std::endl;
+        usleep(1000000);
+        if (tries++ >= 30)
+            return;
     }
 
     if (listen(server_fd, 3) < 0)
@@ -123,11 +150,43 @@ void Server::acceptClient()
 
     if (client_fd < 0)
     {
-        std::cerr << ERROR << "Failed to accept client" << std::endl;
+        // Non-blocking mode
+        if (errno == EWOULDBLOCK || errno == EAGAIN)
+        {
+            return; // Not an error, just no connections to accept
+        }
+        else
+        {
+            std::cerr << ERROR << "Failed to accept client" << std::endl;
+            return;
+        }
+    }
+
+    // Set the new client socket to non-blocking mode
+    int flags = fcntl(client_fd, F_GETFL, 0);
+    if (flags < 0)
+    {
+        std::cerr << ERROR << "Failed to get flags for client socket" << std::endl;
+        close(client_fd);
+        return;
+    }
+
+    flags |= O_NONBLOCK;
+    if (fcntl(client_fd, F_SETFL, flags) < 0)
+    {
+        std::cerr << ERROR << "Failed to set client socket to non-blocking" << std::endl;
+        close(client_fd);
         return;
     }
 
     Client newClient(client_fd, client_address);
+    //debug print the whole clients map
+    std::cout << "Clients map: " << std::endl;
+    for (std::map<int, Client>::iterator it = clients.begin(); it != clients.end(); ++it)
+    {
+        std::cout << it->first << " => " << it->second.getNickname() << std::endl;
+    }
+
     clients[client_fd] = newClient;
 
     std::cout << GREEN << "Client connected: " << RESET << client_fd - 3 << std::endl;
@@ -139,10 +198,13 @@ void Server::authenticateClient(int client_fd)
 {
     char buffer[1024] = {0};
     ssize_t bytes_read = readFromSocket(client_fd, buffer, sizeof(buffer));
-    if (bytes_read <= 0)
+    if (bytes_read == -1)
     {
-        std::cout << RED << "Client disconnected: " << client_fd - 3 << RESET << std::endl;
-        return;
+        return; // Client disconnected
+    }
+    else if (bytes_read == -2)
+    {
+        return; // No data available yet, return and wait for more data
     }
 
     std::string completeMessage(buffer, bytes_read);
@@ -151,8 +213,10 @@ void Server::authenticateClient(int client_fd)
     std::cout << LIGHT GRAY << "[" << client_fd - 3 << "] Authenticating client" << RESET << std::endl;
     // debug print the data the user is sending
     std::string debugMessage = completeMessage;
-    while (debugMessage.find("\r\n") != std::string::npos)
-        debugMessage.replace(debugMessage.find("\r\n"), 2, LIGHT PURPLE "\\r\\n" RESET);
+    while (debugMessage.find("\r") != std::string::npos)
+        debugMessage.replace(debugMessage.find("\r"), 1, LIGHT PURPLE "\\r" RESET);
+    while (debugMessage.find("\n") != std::string::npos)
+        debugMessage.replace(debugMessage.find("\n"), 1, LIGHT PURPLE "\\n" RESET);
     std::cout << LIGHT GRAY << "[" << client_fd - 3 << "] Data received : " << RESET << debugMessage << std::endl;
 
     while (std::getline(f, line))
@@ -193,41 +257,33 @@ void Server::authenticateClient(int client_fd)
 
 int Server::readFromClient(Client &client)
 {
-
     if (!client.isAuthenticated())
     {
-        // client is not authenticated yet, we listen to him again to get all the command (PASS, NICK, USER)
         authenticateClient(client.getFd());
         return 0;
     }
     else
     {
-        std::cout << LIGHT GRAY << "[" << client.getFd() - 3 << "] Reading from authenticated client" << RESET << std::endl; // Debug line
+        std::cout << LIGHT GRAY << "[" << client.getFd() - 3 << "] Reading from authenticated client" << RESET << std::endl;
         int client_fd = client.getFd();
         char buffer[1024] = {0};
         ssize_t bytes_read = readFromSocket(client_fd, buffer, sizeof(buffer));
         if (bytes_read <= 0)
         {
-            close(client_fd);
-            return -1;
+            return -1; // Client disconnected or error
         }
 
         std::string message(buffer, bytes_read);
+        std::string debugMessage = message;
+        while (debugMessage.find("\r") != std::string::npos)
+            debugMessage.replace(debugMessage.find("\r"), 1, LIGHT PURPLE "\\r" RESET);
+        while (debugMessage.find("\n") != std::string::npos)
+            debugMessage.replace(debugMessage.find("\n"), 1, LIGHT PURPLE "\\n" RESET);
+        std::cout << LIGHT GRAY << "Received message: " << RESET << debugMessage << std::endl;
+
         // handle message as command
         commandHandler->handleCommand(message, client_fd, *this);
 
-        std::string debugMessage = message;
-        while (debugMessage.find("\r\n") != std::string::npos)
-            debugMessage.replace(debugMessage.find("\r\n"), 2, LIGHT PURPLE "\\r\\n" RESET);
-        std::cout << LIGHT GRAY << "Received message: " << RESET << debugMessage << std::endl;
-        if (clients.find(client_fd) != clients.end())
-        {
-            std::cout << LIGHT GRAY << "Client socket is still open" << std::endl;
-        }
-        else
-        {
-            std::cout << "Client socket is closed" << std::endl;
-        }
         return 0;
     }
 }
@@ -235,13 +291,33 @@ int Server::readFromClient(Client &client)
 ssize_t Server::readFromSocket(int client_fd, char *buffer, size_t size)
 {
     ssize_t bytes_read = recv(client_fd, buffer, size, 0);
-    std::cout << LIGHT GRAY << "[" << client_fd - 3 << "] bytes read: " << bytes_read << RESET << std::endl; // Debug line
+    std::cout << LIGHT GRAY << "[" << client_fd - 3 << "] bytes read: " << bytes_read << RESET << std::endl;
+
     if (bytes_read <= 0)
     {
-        std::cerr << ERROR << "Failed to read from client or client disconnected." << std::endl;
-        close(client_fd);
-        clients.erase(client_fd);
+        if (bytes_read == 0)
+        {
+            // Normal disconnection
+            std::cout << RED << "Client disconnected: " << client_fd - 3 << RESET << std::endl;
+            close(client_fd);
+            clients.erase(client_fd);
+            return -1;
+        }
+        else if (errno == EWOULDBLOCK || errno == EAGAIN)
+        {
+            // No data available yet
+            return -2;
+        }
+        else
+        {
+            // Other errors
+            std::cerr << ERROR << "Failed to read from client or client disconnected." << std::endl;
+            close(client_fd);
+            clients.erase(client_fd);
+            return -1;
+        }
     }
+
     return bytes_read;
 }
 
@@ -259,8 +335,19 @@ void Server::joinChannel(const std::string &name, std::string nickname)
         channels[name].addOperator(nickname);
     }
     channels[name].addUser(nickname);
-    std::cout << "User " << nickname << " joined channel " << name << std::endl;
-    RFC2812Handler::sendResponse(332, getClient(getFdFromNickname(nickname)), name + " :" + channels[name].getTopic());
+    // send a RFC2812 message to the client to inform him that he joined the channel
+    if (!channels[name].getTopic().empty())
+    {
+        RFC2812Handler::sendResponse(332, getClient(getFdFromNickname(nickname)), name + " " + channels[name].getTopic());
+
+        // Use stringstream for number to string conversion because of c++98
+        std::ostringstream ss;
+        ss << channels[name].getTopicTime();
+        std::string topicTimeStr = ss.str();
+
+        RFC2812Handler::sendResponse(333, getClient(getFdFromNickname(nickname)), name + " " + nickname + " " + topicTimeStr);
+    }
+    channels[name].broadcastMessageToChannel(":" + nickname + " JOIN :" + name + "\r\n", *this, nickname);
 }
 
 void Server::leaveChannel(const std::string &name, std::string nickname)
@@ -288,6 +375,13 @@ void Server::handleChannelMessage(const std::string &channelName, const std::str
         std::cout << "Channel does not exist" << std::endl;
 }
 
+/**
+ * @brief Returns a pointer to the channel with the given name.
+ * If the channel does not exist, returns NULL.
+ *
+ * @param name: The name of the channel to get
+ * @return Channel*
+ */
 Channel *Server::getChannel(const std::string &name)
 {
     if (channels.find(name) == channels.end())
@@ -314,8 +408,10 @@ void Server::updateNicknameMap(const std::string &oldNick, const std::string &ne
     nicknameToClientMap[newNick] = &client;
 }
 
-int Server::getFdFromNickname(const std::string& nickname) {
-    if(nicknameToClientMap.find(nickname) != nicknameToClientMap.end()) {
+int Server::getFdFromNickname(const std::string &nickname)
+{
+    if (nicknameToClientMap.find(nickname) != nicknameToClientMap.end())
+    {
         return nicknameToClientMap[nickname]->getFd();
     }
     return -1;

@@ -11,6 +11,16 @@ void CommandHandler::handlePRIVMSG(const std::vector<std::string> &tokens, int c
         return;
     }
     std::string target = tokens[1];
+    if (target[0] == '#') {
+        if (server.getChannel(target) == NULL) {
+            rfcHandler.sendResponse(403, server.getClient(client_fd), target + " :No such channel");
+            return;
+        }
+        else if (!server.getChannel(target)->isInChannel(server.getClient(client_fd).getNickname())) {
+            rfcHandler.sendResponse(442, server.getClient(client_fd), target + " :You're not on that channel");
+            return;
+        }
+    }
 
     // The message is everything after the target
     std::string message = "";
