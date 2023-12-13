@@ -31,6 +31,7 @@ public:
     void updateNicknameMap(const std::string& oldNick, const std::string& newNick, Client& client);
     friend class CommandHandler;  
     int getFdFromNickname(const std::string& nickname);
+    void checkNicknameCollision(int client_fd);
 
     
 private:

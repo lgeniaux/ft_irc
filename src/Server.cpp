@@ -32,6 +32,14 @@ void Server::run()
         std::cerr << ERROR << "Failed to create socket" << std::endl;
         return;
     }
+    // Set SO_REUSEADDR to allow immediate reuse of the port and avoid the "Address already in use" error
+    int opt = 1;
+    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
+    {
+        std::cerr << ERROR << "Failed to set SO_REUSEADDR" << std::endl;
+        close(server_fd);
+        return;
+    }
 
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
