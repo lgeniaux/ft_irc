@@ -131,6 +131,7 @@ void Server::run()
             nicknameToClientMap.erase(oldNick);
             clients.erase(*it);
         }
+        disconnectMarkedClients(readfds);
     }
 }
 
@@ -407,4 +408,18 @@ int Server::getFdFromNickname(const std::string &nickname)
         return nicknameToClientMap[nickname]->getFd();
     }
     return -1;
+}
+
+void Server::markClientForDisconnection(int client_fd) {
+    clientsToDisconnect.insert(client_fd);
+}
+
+void Server::disconnectMarkedClients(fd_set& readfds) {
+    for (std::set<int>::iterator it = clientsToDisconnect.begin(); it != clientsToDisconnect.end(); ++it) {
+        int client_fd = *it;
+        close(client_fd);
+        clients.erase(client_fd);
+        FD_CLR(client_fd, &readfds);
+    }
+    clientsToDisconnect.clear();
 }

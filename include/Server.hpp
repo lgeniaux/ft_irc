@@ -32,6 +32,9 @@ public:
     friend class CommandHandler;  
     int getFdFromNickname(const std::string& nickname);
     void checkNicknameCollision(int client_fd);
+    void markClientForDisconnection(int client_fd);
+    void disconnectMarkedClients(fd_set &readfds);
+
 
     
 private:
@@ -44,6 +47,7 @@ private:
     ssize_t readFromSocket(int client_fd, char *buffer, size_t size);
     std::map<std::string, Channel> channels; // name -> channel object
     std::map<std::string, Client *> nicknameToClientMap; // nickname -> client object
+    std::set<int> clientsToDisconnect;
     RFC2812Handler rfcHandler;
 };
 
