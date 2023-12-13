@@ -3,9 +3,8 @@
 #include "Server.hpp"
 #include <unistd.h>
 
-void PART(std::string nickname, std::string channel, std::string message, Server& server);
-
 void CommandHandler::handleKICK(const std::vector<std::string>& tokens, int client_fd, Server& server) {
+    std::pair<Channel*, Client> preCheck;
     Channel *channel;
     Client  client;
 
@@ -13,20 +12,11 @@ void CommandHandler::handleKICK(const std::vector<std::string>& tokens, int clie
         RFC2812Handler::sendResponse(461, server.clients[client_fd], "KICK :Not enough parameters");
         return;
     }
-    client = server.getClient(client_fd);
-    if (!client.isAuthenticated()) {
-        RFC2812Handler::sendResponse(451, server.clients[client_fd], ":You have not registered");
+    preCheck = preChecks(tokens[1], client_fd, server, true);
+    channel = preCheck.first;
+    client = preCheck.second;
+    if (channel == NULL)
         return;
-    }
-    channel = server.getChannel(tokens[1]);
-    if (channel == NULL) {
-        RFC2812Handler::sendResponse(403, server.clients[client_fd], tokens[1] + " :No such channel");
-        return;
-    }
-    if (!channel->isOperator(client.getNickname())) {
-        RFC2812Handler::sendResponse(482, server.clients[client_fd], tokens[1] + " :You're not channel operator");
-        return;
-    }
     if (!channel->isInChannel(tokens[2])) {
         RFC2812Handler::sendResponse(441, server.clients[client_fd], tokens[2] + " " + tokens[1] + " :They aren't on that channel");
         return;
