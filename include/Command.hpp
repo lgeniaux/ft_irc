@@ -24,6 +24,8 @@ class CommandHandler {
         static void handleJOIN(const std::vector<std::string>& tokens, int client_fd, Server& server);
         static void handlePRIVMSG(const std::vector<std::string>& tokens, int client_fd, Server& server);
         static void handlePART(const std::vector<std::string>& tokens, int client_fd, Server& server);
+        static void handleQUIT(const std::vector<std::string>& tokens, int client_fd, Server& server);
+        static void handlePING(const std::vector<std::string>& tokens, int client_fd, Server& server);
 };
 
 #endif
