@@ -2,6 +2,7 @@
 #define CHANNEL_HPP
 
 #include <string>
+#include <ctime>
 #include <set>
 #include <map>
 

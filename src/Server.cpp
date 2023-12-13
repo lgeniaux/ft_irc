@@ -254,7 +254,13 @@ void Server::joinChannel(const std::string &name, std::string nickname)
     // send a RFC2812 message to the client to inform him that he joined the channel
     if (!channels[name].getTopic().empty()){
         RFC2812Handler::sendResponse(332, getClient(getFdFromNickname(nickname)), name + " " + channels[name].getTopic());
-        RFC2812Handler::sendResponse(333, getClient(getFdFromNickname(nickname)), name + " " + nickname + " " + std::to_string(channels[name].getTopicTime()));
+
+        // Use stringstream for number to string conversion because of c++98
+        std::ostringstream ss;
+        ss << channels[name].getTopicTime();
+        std::string topicTimeStr = ss.str();
+
+        RFC2812Handler::sendResponse(333, getClient(getFdFromNickname(nickname)), name + " " + nickname + " " + topicTimeStr);
     }
     channels[name].broadcastMessageToChannel(":" + nickname + " JOIN :" + name + "\r\n", *this, nickname);
 }

@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <ctime>
 #include <iostream>
 #include "Server.hpp"
 #include "RFC2812Handler.hpp"

@@ -24,8 +24,11 @@ void RFC2812Handler::sendResponse(int code, Client& client, const std::string& m
     oss << ": " << code << " " << client.getNickname() << " " << message;
     std::string formattedMessage = formatMessage(oss.str());
     send(fd, formattedMessage.c_str(), formattedMessage.size(), 0);
-    while (formattedMessage.back() == '\r' || formattedMessage.back() == '\n')
-        formattedMessage.pop_back();
+    while (!formattedMessage.empty() &&
+        (formattedMessage[formattedMessage.size() - 1] == '\r' ||
+            formattedMessage[formattedMessage.size() - 1] == '\n')) {
+        formattedMessage.erase(formattedMessage.size() - 1);
+    }
     std::cout << LIGHT GRAY << "Sending response: \"" << RESET << formattedMessage << "\"" << std::endl;
 }
 
