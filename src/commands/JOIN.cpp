@@ -3,25 +3,51 @@
 #include "Server.hpp"
 #include "RFC2812Handler.hpp"
 
-void CommandHandler::handleJOIN(const std::vector<std::string>& tokens, int client_fd, Server& server) {
-    RFC2812Handler rfcHandler;  // Initialize here
+
+void sendJoinSuccessInfo(Server& server, const std::string& channelName, int client_fd) {
+    RFC2812Handler rfcHandler;
+    Channel* channel = server.getChannel(channelName);
+    if (!channel) {
+        return;
+    }
     
-    if (tokens.size() < 2) {
+    // Send the topic of the channel
+    if (!channel->getTopic().empty()) {
+        rfcHandler.sendResponse(332, server.getClient(client_fd), channelName + " :" + channel->getTopic());
+    }
+
+    // Send the names list
+    std::set<std::string> users = channel->getUsers();
+    std::string namesList;
+    for (const std::string& nickname : users) {
+        namesList += nickname + " ";
+    }
+    rfcHandler.sendResponse(353, server.getClient(client_fd), "=" + channelName + " :" + namesList);
+    rfcHandler.sendResponse(366, server.getClient(client_fd), channelName + " :End of NAMES list");
+}
+
+void CommandHandler::handleJOIN(const std::vector<std::string> &tokens, int client_fd, Server &server)
+{
+    RFC2812Handler rfcHandler; // Initialize here
+
+    if (tokens.size() < 2)
+    {
         rfcHandler.sendResponse(461, server.getClient(client_fd), "JOIN :Not enough parameters");
         return;
     }
 
-    const std::string& channelName = tokens[1];
-    Channel* channel = server.getChannel(channelName);
+    const std::string &channelName = tokens[1];
+    Channel *channel = server.getChannel(channelName);
 
     // Obtain the client's nickname based on their fd using the server's nickname to client map
     std::string clientNickname = server.getClient(client_fd).getNickname();
-    if (clientNickname.empty()) {
+    if (clientNickname.empty())
+    {
         // Handle the error, e.g., by sending a message to the client
         return;
     }
 
-   if (channel != NULL)
+    if (channel != NULL)
     {
         // Debug Channel mode and invite status
         std::cout << "Channel mode: " << channel->getMode('i') << std::endl;

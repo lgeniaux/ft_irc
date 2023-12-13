@@ -45,6 +45,8 @@ public:
     // MESSAGES
     void broadcastMessageToChannel(const std::string& message, Server& server, const std::string& sender);
 
+    std::set<std::string> getUsers() const;
+
 private:
     std::string name;
     std::string topic;
