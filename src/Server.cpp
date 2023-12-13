@@ -408,6 +408,10 @@ void Server::updateNicknameMap(const std::string &oldNick, const std::string &ne
     }
 
     nicknameToClientMap[newNick] = &client;
+    std::map<std::string, Channel>::iterator it;
+    for (it = channels.begin(); it != channels.end(); ++it)
+        if (it->second.isInChannel(oldNick))
+            it->second.updateNickname(oldNick, newNick);
 }
 
 int Server::getFdFromNickname(const std::string &nickname)

@@ -143,3 +143,9 @@ std::set<std::string> Channel::getUsers() const
 {
     return users;
 }
+
+void Channel::updateNickname(std::string oldNick, std::string newNick)
+{
+    users.erase(oldNick);
+    users.insert(newNick);
+}
