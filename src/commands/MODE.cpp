@@ -19,8 +19,13 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
     // Differentiate between - and + modes (e.g: MODE #chan +o nick)
     const char modeSign = mode[0];
 
-    // list of supported modes
-    std::vector<char> supportedModes = {'i', 't', 'k', 'o', 'l'};
+    // list of supported modes (ugly because of c++98)
+    std::vector<char> supportedModes;
+    supportedModes.push_back('i');
+    supportedModes.push_back('t');
+    supportedModes.push_back('k');
+    supportedModes.push_back('o');
+    supportedModes.push_back('l');
 
     // Irssi sends '+' by default (if channelname contains # on input), so the check is not necessary but I'll leave it here
     if (modeSign != '+' && modeSign != '-')
