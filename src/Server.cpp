@@ -172,6 +172,13 @@ void Server::acceptClient()
     }
 
     Client newClient(client_fd, client_address);
+    //debug print the whole clients map
+    std::cout << "Clients map: " << std::endl;
+    for (std::map<int, Client>::iterator it = clients.begin(); it != clients.end(); ++it)
+    {
+        std::cout << it->first << " => " << it->second.getNickname() << std::endl;
+    }
+
     clients[client_fd] = newClient;
 
     std::cout << GREEN << "Client connected: " << RESET << client_fd - 3 << std::endl;
@@ -183,10 +190,13 @@ void Server::authenticateClient(int client_fd)
 {
     char buffer[1024] = {0};
     ssize_t bytes_read = readFromSocket(client_fd, buffer, sizeof(buffer));
-    if (bytes_read <= 0)
+    if (bytes_read == -1)
     {
-        std::cout << RED << "Client disconnected: " << client_fd - 3 << RESET << std::endl;
-        return;
+        return; // Client disconnected
+    }
+    else if (bytes_read == -2)
+    {
+        return; // No data available yet, return and wait for more data
     }
 
     std::string completeMessage(buffer, bytes_read);
@@ -276,20 +286,28 @@ ssize_t Server::readFromSocket(int client_fd, char *buffer, size_t size)
     std::cout << LIGHT GRAY << "[" << client_fd - 3 << "] bytes read: " << bytes_read << RESET << std::endl;
 
     if (bytes_read <= 0)
-    { // Client disconnected or error occurred
+    {
         if (bytes_read == 0)
         {
             // Normal disconnection
             std::cout << RED << "Client disconnected: " << client_fd - 3 << RESET << std::endl;
+            close(client_fd);
+            clients.erase(client_fd);
+            return -1;
         }
-        else if (errno != EWOULDBLOCK && errno != EAGAIN)
+        else if (errno == EWOULDBLOCK || errno == EAGAIN)
         {
-            // Error occurred
-            std::cerr << ERROR << "Failed to read from client or client disconnected." << std::endl;
+            // No data available yet
+            return -2;
         }
-        close(client_fd);
-        clients.erase(client_fd);
-        return -1;
+        else
+        {
+            // Other errors
+            std::cerr << ERROR << "Failed to read from client or client disconnected." << std::endl;
+            close(client_fd);
+            clients.erase(client_fd);
+            return -1;
+        }
     }
 
     return bytes_read;
