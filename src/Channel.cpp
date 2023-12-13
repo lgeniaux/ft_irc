@@ -98,7 +98,7 @@ void Channel::broadcastMessageToChannel(const std::string &message, Server &serv
         {
             std::string nickname = *it;
             int fd = server.getFdFromNickname(nickname);
-            std::cout << "Sending message " << message << " to " << nickname << " on fd " << fd << std::endl;
+            std::cout << LIGHT GRAY << "Sending message " << RESET << message << LIGHT GRAY << " to " << nickname << " on fd " << fd << RESET << std::endl;
             if (fd != -1)
             { // Check if fd is valid
                 send(fd, message.c_str(), message.length(), 0);
