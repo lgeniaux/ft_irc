@@ -23,10 +23,11 @@ void sendJoinSuccessInfo(Server &server, const std::string &channelName, int cli
     // Send the names list
     std::set<std::string> users = channel->getUsers();
     std::string namesList;
-    for (const std::string &nickname : users)
-    {
-        namesList += nickname + " ";
+    std::set<std::string>::const_iterator it;
+    for (it = users.begin(); it != users.end(); ++it) {
+        namesList += *it + " ";
     }
+
     rfcHandler.sendResponse(353, server.getClient(client_fd), "=" + channelName + " :" + namesList);
     rfcHandler.sendResponse(366, server.getClient(client_fd), channelName + " :End of NAMES list");
 }
