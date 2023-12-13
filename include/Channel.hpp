@@ -38,7 +38,7 @@ public:
     bool checkKey(std::string key) const;
 
     void setLimit(int newLimit);
-    int getLimit() const;
+    size_t getLimit() const;
     // MESSAGES
     void broadcastMessageToChannel(const std::string& message, Server& server, const std::string& sender);
 
@@ -49,7 +49,7 @@ private:
     std::string name;
     std::string topic;
     std::string key;
-    int limit;
+    size_t limit;
     std::set<std::string> users;
     std::set<std::string> operators;
     std::set<std::string> invitedUsers;

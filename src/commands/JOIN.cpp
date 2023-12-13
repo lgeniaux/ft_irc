@@ -74,6 +74,10 @@ void CommandHandler::handleJOIN(const std::vector<std::string> &tokens, int clie
     {
         rfcHandler.sendResponse(475, server.getClient(client_fd), channelName + " :Cannot join channel (+k)");
     }
+    else if (channel->getLimit() != 0 && channel->getUsers().size() >= channel->getLimit())
+    {
+        rfcHandler.sendResponse(471, server.getClient(client_fd), channelName + " :Cannot join channel (+l)");
+    }
     else if (!channel->isInChannel(clientNickname))
     {
         server.joinChannel(channelName, clientNickname);

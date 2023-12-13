@@ -131,7 +131,7 @@ void Channel::setLimit(int newLimit)
     limit = newLimit;
 }
 
-int Channel::getLimit() const
+size_t Channel::getLimit() const
 {
     return limit;
 }
