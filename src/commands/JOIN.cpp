@@ -52,6 +52,12 @@ void CommandHandler::handleJOIN(const std::vector<std::string> &tokens, int clie
         // Debug Channel mode and invite status
         std::cout << "Channel mode: " << channel->getMode('i') << std::endl;
         std::cout << "Channel invite status: " << channel->isInvited(clientNickname) << std::endl;
+        // Debug Channel key and key status
+        std::cout << "Channel key: " << channel->checkKey(tokens[2]) << std::endl;
+        std::cout << "Channel key status: " << channel->getMode('k') << std::endl;
+
+        //Debug client command arguments
+        std::cout << "Client command arguments: " << tokens[1] << " " << tokens[2] << std::endl;
     }
 
     if (channel == NULL)
@@ -63,7 +69,10 @@ void CommandHandler::handleJOIN(const std::vector<std::string> &tokens, int clie
     else if (channel->getMode('i') && !channel->isInvited(clientNickname))
     {
         rfcHandler.sendResponse(473, server.getClient(client_fd), channelName + " :Cannot join channel (+i)");
-        return;
+    }
+    else if (channel->getMode('k') && !channel->checkKey(tokens[2]))
+    {
+        rfcHandler.sendResponse(475, server.getClient(client_fd), channelName + " :Cannot join channel (+k)");
     }
     else if (!channel->isInChannel(clientNickname))
     {
