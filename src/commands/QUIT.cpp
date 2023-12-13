@@ -5,8 +5,10 @@
 
 void CommandHandler::handleQUIT(const std::vector<std::string>& tokens, int client_fd, Server& server) {
 	Client& client = server.getClient(client_fd);
-	if (!client.isAuthenticated())
+	if (!client.isAuthenticated()) {
+		server.markClientForDisconnection(client_fd);
 		return;
+	}
 	std::string message = ":" + client.getNickname() + " QUIT";
 	for (size_t i = 1; i < tokens.size(); ++i) {
 		message += " " + tokens[i];
@@ -19,6 +21,5 @@ void CommandHandler::handleQUIT(const std::vector<std::string>& tokens, int clie
 			server.leaveChannel(it->second.getName(), client.getNickname());
 		}
 	}
-	close(client_fd);
-	server.clients.erase(client_fd);
+	server.markClientForDisconnection(client_fd);
 }
