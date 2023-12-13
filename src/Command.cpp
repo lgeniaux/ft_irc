@@ -26,6 +26,8 @@ void CommandHandler::handleCommand(const std::string& command, int client_fd, Se
     commandRegistry["CAP"] = handleCAP;
     commandRegistry["PRIVMSG"] = handlePRIVMSG;
     commandRegistry["PART"] = handlePART;
+    commandRegistry["QUIT"] = handleQUIT;
+    commandRegistry["PING"] = handlePING;
     
     for (; issIt != end; ++issIt) {
         tokens.push_back(*issIt);

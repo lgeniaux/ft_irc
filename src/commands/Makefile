@@ -6,7 +6,7 @@
 #    By: jcollon <jcollon@student.42lyon.fr>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/09/07 18:27:41 by jcollon           #+#    #+#              #
-#    Updated: 2023/09/22 20:22:06 by jcollon          ###   ########lyon.fr    #
+#    Updated: 2023/12/13 17:06:57 by jcollon          ###   ########lyon.fr    #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,13 +24,15 @@ SRC_FILE := INVITE.cpp \
 			TOPIC.cpp \
 			CAP.cpp \
 			PRIVMSG.cpp \
+			QUIT.cpp \
+			PING.cpp \
 			PART.cpp \
 
 OBJ_FILE := $(SRC_FILE:.cpp=.o)
 OBJ = $(addprefix $(DIR_OBJ)/, $(OBJ_FILE))
 
 DIR_OBJ := .obj
-FLAGS := -g3 -MMD -MP -Wall -Wextra #-Werror
+FLAGS := -g3 -MMD -MP -Wall -Wextra -Werror -std=c++98
 
 INCLUDE := -I. -I../../include
 RELINK := Makefile 

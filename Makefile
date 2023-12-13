@@ -6,7 +6,7 @@
 #    By: jcollon <jcollon@student.42lyon.fr>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/09/07 17:05:51 by jcollon           #+#    #+#              #
-#    Updated: 2023/09/07 21:01:13 by jcollon          ###   ########lyon.fr    #
+#    Updated: 2023/12/13 17:01:55 by jcollon          ###   ########lyon.fr    #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,7 +24,7 @@ OBJ = $(addprefix $(DIR_OBJ)/, $(SRC_FILE:.cpp=.o))
 
 DIR_OBJ := .obj
 COMMANDS := src/commands/commands.a
-FLAGS := -g -MMD -MP -std=c++98 -Wall -Wextra -Werror
+FLAGS := -g -MMD -MP -Wall -Wextra -Werror -std=c++98
 INCLUDE := -I./include
 
 RELINK := Makefile

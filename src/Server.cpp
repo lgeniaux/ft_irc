@@ -292,8 +292,10 @@ ssize_t Server::readFromSocket(int client_fd, char *buffer, size_t size)
         {
             // Normal disconnection
             std::cout << RED << "Client disconnected: " << client_fd - 3 << RESET << std::endl;
-            close(client_fd);
-            clients.erase(client_fd);
+            CommandHandler commandHandler;
+            commandHandler.handleCommand("QUIT :Remote host closed the connection\r\n", client_fd, *this);
+            // close(client_fd);
+            // clients.erase(client_fd); // already done in handleQUIT
             return -1;
         }
         else if (errno == EWOULDBLOCK || errno == EAGAIN)
@@ -386,6 +388,13 @@ Channel *Server::getChannel(const std::string &name)
     return &channels[name];
 }
 
+/**
+ * @brief Returns a pointer to the client with the given fd.
+ * If the client does not exist, returns garbage.
+ * 
+ * @param client_fd: The fd of the client to get
+ * @return Client*
+ */
 Client &Server::getClient(int client_fd)
 {
     return clients[client_fd];
