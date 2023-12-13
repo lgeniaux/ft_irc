@@ -115,3 +115,31 @@ bool Channel::isInChannel(std::string nickname) const
     }
     return false;
 }
+void Channel::setKey(std::string newKey)
+{
+    key = newKey;
+}
+
+bool Channel::checkKey(std::string key) const
+{
+    if (this->key == key)
+    {
+        return true;
+    }
+    return false;
+}
+
+void Channel::setLimit(int newLimit)
+{
+    limit = newLimit;
+}
+
+size_t Channel::getLimit() const
+{
+    return limit;
+}
+
+std::set<std::string> Channel::getUsers() const
+{
+    return users;
+}

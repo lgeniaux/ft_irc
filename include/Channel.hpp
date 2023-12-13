@@ -37,6 +37,11 @@ public:
     void removeInvite(std::string nickname);
     bool isInvited(std::string nickname) const;
 
+    void setKey(std::string newKey);
+    bool checkKey(std::string key) const;
+
+    void setLimit(int newLimit);
+    size_t getLimit() const;
     // MESSAGES
     void broadcastMessageToChannel(const std::string& message, Server& server, const std::string& sender);
 
@@ -44,6 +49,8 @@ private:
     std::string name;
     std::string topic;
     time_t topicTime;
+    std::string key;
+    size_t limit;
     std::set<std::string> users;
     std::set<std::string> operators;
     std::set<std::string> invitedUsers;
