@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <algorithm>
 #include <sstream>
+#include <fcntl.h>
 #include "Command.hpp"
 #include "RFC2812Handler.hpp"
 
@@ -40,6 +41,20 @@ void Server::run()
         close(server_fd);
         return;
     }
+
+    // Set the server socket to non-blocking
+    int flags = fcntl(server_fd, F_GETFL, 0);
+    if (flags < 0) {
+        std::cerr << ERROR << "Failed to get flags for socket" << std::endl;
+        return;
+    }
+
+    flags |= O_NONBLOCK;
+    if (fcntl(server_fd, F_SETFL, flags) < 0) {
+        std::cerr << ERROR << "Failed to set server socket to non-blocking" << std::endl;
+        return;
+    }
+
 
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
@@ -124,9 +139,29 @@ void Server::acceptClient()
     socklen_t addrlen = sizeof(client_address);
     int client_fd = accept(server_fd, (struct sockaddr *)&client_address, &addrlen);
 
-    if (client_fd < 0)
-    {
-        std::cerr << ERROR << "Failed to accept client" << std::endl;
+    if (client_fd < 0) {
+        // Non-blocking mode
+        if (errno == EWOULDBLOCK || errno == EAGAIN) {
+            return; // Not an error, just no connections to accept
+        } else {
+            std::cerr << ERROR << "Failed to accept client" << std::endl;
+            return;
+        }
+    }
+
+
+    // Set the new client socket to non-blocking mode
+    int flags = fcntl(client_fd, F_GETFL, 0);
+    if (flags < 0) {
+        std::cerr << ERROR << "Failed to get flags for client socket" << std::endl;
+        close(client_fd); 
+        return;
+    }
+
+    flags |= O_NONBLOCK;
+    if (fcntl(client_fd, F_SETFL, flags) < 0) {
+        std::cerr << ERROR << "Failed to set client socket to non-blocking" << std::endl;
+        close(client_fd); 
         return;
     }
 
@@ -236,12 +271,18 @@ ssize_t Server::readFromSocket(int client_fd, char *buffer, size_t size)
 {
     ssize_t bytes_read = recv(client_fd, buffer, size, 0);
     std::cout << LIGHT GRAY << "[" << client_fd - 3 << "] bytes read: " << bytes_read << RESET << std::endl; // Debug line
-    if (bytes_read <= 0)
-    {
-        std::cerr << ERROR << "Failed to read from client or client disconnected." << std::endl;
-        close(client_fd);
-        clients.erase(client_fd);
+    if (bytes_read < 0) {
+        // Non-blocking mode
+        if (errno == EWOULDBLOCK || errno == EAGAIN) {
+            return 0; // Not an error, just no data available to read
+        } else {
+            std::cerr << ERROR << "Failed to read from client or client disconnected." << std::endl;
+            close(client_fd);
+            clients.erase(client_fd);
+            return -1;
+        }
     }
+
     return bytes_read;
 }
 
