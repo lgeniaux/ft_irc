@@ -1,74 +1,92 @@
 #include "Client.hpp"
 #include <cstring>
 
-Client::Client() : fd(-1), authenticated(false), passReceived(false), nickReceived(false), userReceived(false) {
+Client::Client() : fd(-1), authenticated(false), passReceived(false), nickReceived(false), userReceived(false)
+{
     memset(&address, 0, sizeof(address));
 }
 
-Client::Client(int fd, const sockaddr_in& clientAddress) 
-    : fd(fd), authenticated(false), address(clientAddress), passReceived(false), nickReceived(false), userReceived(false) {
+Client::Client(int fd, const sockaddr_in &clientAddress)
+    : fd(fd), authenticated(false), address(clientAddress), passReceived(false), nickReceived(false), userReceived(false)
+{
 }
 
-bool Client::isAuthenticated() const {
+bool Client::isAuthenticated() const
+{
     return authenticated;
 }
 
-void Client::setAuthenticated(bool auth) {
+void Client::setAuthenticated(bool auth)
+{
     authenticated = auth;
 }
 
-int Client::getFd() const {
+int Client::getFd() const
+{
     return fd;
 }
 
-void Client::setNickname(const std::string& name) {
+void Client::setNickname(const std::string &name)
+{
     nickname = name;
 }
 
-std::string Client::getNickname() const {
+std::string Client::getNickname() const
+{
     return nickname;
 }
 
-sockaddr_in Client::getAddress() const {
+sockaddr_in Client::getAddress() const
+{
     return address;
 }
 
-void Client::setUsername(const std::string& name) {
+void Client::setUsername(const std::string &name)
+{
     username = name;
 }
 
-std::string Client::getUsername() const {
+std::string Client::getUsername() const
+{
     return username;
 }
 
-void Client::setRealname(const std::string& name) {
+void Client::setRealname(const std::string &name)
+{
     realname = name;
 }
 
-std::string Client::getRealname() const {
+std::string Client::getRealname() const
+{
     return realname;
 }
 
-void Client::setPassReceived(bool state) {
+void Client::setPassReceived(bool state)
+{
     passReceived = state;
 }
 
-bool Client::isPassReceived() const {
+bool Client::isPassReceived() const
+{
     return passReceived;
 }
 
-void Client::setNickReceived(bool state) {
+void Client::setNickReceived(bool state)
+{
     nickReceived = state;
 }
 
-bool Client::isNickReceived() const {
+bool Client::isNickReceived() const
+{
     return nickReceived;
 }
 
-void Client::setUserReceived(bool state) {
+void Client::setUserReceived(bool state)
+{
     userReceived = state;
 }
 
-bool Client::isUserReceived() const {
+bool Client::isUserReceived() const
+{
     return userReceived;
 }

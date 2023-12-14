@@ -3,12 +3,14 @@
 #include "Server.hpp"
 #include <unistd.h>
 
-void CommandHandler::handlePART(const std::vector<std::string>& tokens, int client_fd, Server& server) {
-	std::pair<Channel*, Client> preCheck;
+void CommandHandler::handlePART(const std::vector<std::string> &tokens, int client_fd, Server &server)
+{
+	std::pair<Channel *, Client> preCheck;
 	Channel *channel;
-	Client  client;
+	Client client;
 
-	if (tokens.size() < 2) {
+	if (tokens.size() < 2)
+	{
 		RFC2812Handler::sendResponse(461, server.clients[client_fd], "PART :Not enough parameters");
 		return;
 	}

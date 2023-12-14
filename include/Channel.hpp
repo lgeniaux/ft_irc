@@ -45,7 +45,7 @@ public:
     void setLimit(int newLimit);
     size_t getLimit() const;
     // MESSAGES
-    void broadcastMessageToChannel(const std::string& message, Server& server, const std::string& sender);
+    void broadcastMessageToChannel(const std::string &message, Server &server, const std::string &sender);
 
     std::set<std::string> getUsers() const;
 

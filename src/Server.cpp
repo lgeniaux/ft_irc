@@ -264,7 +264,7 @@ int Server::readFromClient(Client &client)
         int client_fd = client.getFd();
         char buffer[1024] = {0};
         ssize_t bytes_read = readFromSocket(client_fd, buffer, sizeof(buffer));
-        
+
         if (bytes_read <= 0)
         {
             return -1; // Client disconnected or error
@@ -287,7 +287,6 @@ int Server::readFromClient(Client &client)
         return 0;
     }
 }
-
 
 ssize_t Server::readFromSocket(int client_fd, char *buffer, size_t size)
 {
@@ -399,7 +398,7 @@ Channel *Server::getChannel(const std::string &name)
 /**
  * @brief Returns a pointer to the client with the given fd.
  * If the client does not exist, returns garbage.
- * 
+ *
  * @param client_fd: The fd of the client to get
  * @return Client*
  */
@@ -444,13 +443,16 @@ void Server::removeFdFromNicknameMap(int fd)
     }
 }
 
-void Server::markClientForDisconnection(int client_fd) {
-	removeFdFromNicknameMap(client_fd);
+void Server::markClientForDisconnection(int client_fd)
+{
+    removeFdFromNicknameMap(client_fd);
     clientsToDisconnect.insert(client_fd);
 }
 
-void Server::disconnectMarkedClients(fd_set& readfds) {
-    for (std::set<int>::iterator it = clientsToDisconnect.begin(); it != clientsToDisconnect.end(); ++it) {
+void Server::disconnectMarkedClients(fd_set &readfds)
+{
+    for (std::set<int>::iterator it = clientsToDisconnect.begin(); it != clientsToDisconnect.end(); ++it)
+    {
         int client_fd = *it;
         close(client_fd);
         clients.erase(client_fd);

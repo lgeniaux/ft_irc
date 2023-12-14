@@ -2,27 +2,28 @@
 #define CLIENT_HPP
 
 #include <string>
-#include <netinet/in.h> 
+#include <netinet/in.h>
 #include "Colors&Ascii.hpp"
 
-class Client {
+class Client
+{
 public:
     Client();
-    Client(int fd, const sockaddr_in& clientAddress);
+    Client(int fd, const sockaddr_in &clientAddress);
     bool isAuthenticated() const;
     void setAuthenticated(bool auth);
     int getFd() const;
-    void setNickname(const std::string& name);
+    void setNickname(const std::string &name);
     std::string getNickname() const;
     sockaddr_in getAddress() const;
-    
-    void setUsername(const std::string& name);
+
+    void setUsername(const std::string &name);
     std::string getUsername() const;
 
-    void setRealname(const std::string& name);
+    void setRealname(const std::string &name);
     std::string getRealname() const;
 
-    //LOGIN FLOW
+    // LOGIN FLOW
     void setPassReceived(bool state);
     bool isPassReceived() const;
 

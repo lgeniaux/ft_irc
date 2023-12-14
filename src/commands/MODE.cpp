@@ -5,7 +5,7 @@
 void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int client_fd, Server &server)
 {
     RFC2812Handler rfcHandler;
-    std::pair<Channel*, Client> preChecksResult;
+    std::pair<Channel *, Client> preChecksResult;
     Channel *channel;
     Client client;
 

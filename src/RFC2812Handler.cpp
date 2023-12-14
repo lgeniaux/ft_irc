@@ -4,7 +4,8 @@
 #include <arpa/inet.h>
 #include <iostream>
 
-void RFC2812Handler::sendInitialConnectionMessages(Client& client) {
+void RFC2812Handler::sendInitialConnectionMessages(Client &client)
+{
     int fd = client.getFd();
     std::string welcomeMessage = ":localhost 001 " + client.getNickname() + " :" + WELCOME_MSG;
     if (welcomeMessage.find("${NAME}") != std::string::npos)
@@ -17,21 +18,23 @@ void RFC2812Handler::sendInitialConnectionMessages(Client& client) {
     send(fd, welcomeMessage.c_str(), welcomeMessage.size(), 0);
 }
 
-
-void RFC2812Handler::sendResponse(int code, Client& client, const std::string& message) {
+void RFC2812Handler::sendResponse(int code, Client &client, const std::string &message)
+{
     int fd = client.getFd();
     std::ostringstream oss;
     oss << ": " << code << " " << client.getNickname() << " " << message;
     std::string formattedMessage = formatMessage(oss.str());
     send(fd, formattedMessage.c_str(), formattedMessage.size(), 0);
     while (!formattedMessage.empty() &&
-        (formattedMessage[formattedMessage.size() - 1] == '\r' ||
-            formattedMessage[formattedMessage.size() - 1] == '\n')) {
+           (formattedMessage[formattedMessage.size() - 1] == '\r' ||
+            formattedMessage[formattedMessage.size() - 1] == '\n'))
+    {
         formattedMessage.erase(formattedMessage.size() - 1);
     }
     std::cout << LIGHT GRAY << "Sending :" << RESET << formattedMessage << std::endl;
 }
 
-std::string RFC2812Handler::formatMessage(const std::string& message) {
+std::string RFC2812Handler::formatMessage(const std::string &message)
+{
     return message + "\r\n";
 }

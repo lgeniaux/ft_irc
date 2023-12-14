@@ -24,7 +24,8 @@ void sendJoinSuccessInfo(Server &server, const std::string &channelName, int cli
     std::set<std::string> users = channel->getUsers();
     std::string namesList = "";
     std::set<std::string>::const_iterator it;
-    for (it = users.begin(); it != users.end(); ++it) {
+    for (it = users.begin(); it != users.end(); ++it)
+    {
         namesList += *it + " ";
     }
     namesList = namesList.substr(0, namesList.size() - 1);
@@ -68,9 +69,12 @@ void CommandHandler::handleJOIN(const std::vector<std::string> &tokens, int clie
     {
         const std::string &channelName = channels[i];
         std::string key;
-        if (i < keys.size()) {
+        if (i < keys.size())
+        {
             key = keys[i];
-        } else {
+        }
+        else
+        {
             key = std::string();
         }
 

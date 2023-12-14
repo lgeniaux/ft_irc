@@ -4,11 +4,12 @@
 #include <string>
 #include "Client.hpp"
 
-class RFC2812Handler {
+class RFC2812Handler
+{
 public:
-    static void sendInitialConnectionMessages(Client& client);
-    static void sendResponse(int code, Client& client, const std::string& message);
-    static std::string formatMessage(const std::string& message);
+    static void sendInitialConnectionMessages(Client &client);
+    static void sendResponse(int code, Client &client, const std::string &message);
+    static std::string formatMessage(const std::string &message);
 };
 
 #endif

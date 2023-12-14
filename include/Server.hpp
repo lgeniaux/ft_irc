@@ -12,42 +12,42 @@
 
 class CommandHandler;
 
-class Server {
+class Server
+{
 public:
-    Server(int port, const std::string& password);
+    Server(int port, const std::string &password);
     ~Server();
     void run();
     void acceptClient();
     void authenticateClient(int client_fd);
-    int readFromClient(Client& client);
-    Client& getClient(int client_fd);
+    int readFromClient(Client &client);
+    Client &getClient(int client_fd);
     // Channel methods
-    void createChannel(const std::string& name);
+    void createChannel(const std::string &name);
     void joinChannel(const std::string &name, std::string nickname);
     void leaveChannel(const std::string &name, std::string nickname);
-    void handleChannelMessage(const std::string& channelName, const std::string& message, const std::string senderNick);
-    Channel* getChannel(const std::string& name);
-    void updateNicknameMap(const std::string& oldNick, const std::string& newNick, Client& client);
+    void handleChannelMessage(const std::string &channelName, const std::string &message, const std::string senderNick);
+    Channel *getChannel(const std::string &name);
+    void updateNicknameMap(const std::string &oldNick, const std::string &newNick, Client &client);
     void removeFdFromNicknameMap(int fd);
-    friend class CommandHandler;  
-    int getFdFromNickname(const std::string& nickname);
+    friend class CommandHandler;
+    int getFdFromNickname(const std::string &nickname);
     void markClientForDisconnection(int client_fd);
     void disconnectMarkedClients(fd_set &readfds);
-    
+
 private:
     int port;
     std::string password;
     int server_fd;
     sockaddr_in address;
-    CommandHandler* commandHandler;
+    CommandHandler *commandHandler;
     std::map<int, Client> clients;
     ssize_t readFromSocket(int client_fd, char *buffer, size_t size);
-    std::map<std::string, Channel> channels; // name -> channel object
+    std::map<std::string, Channel> channels;             // name -> channel object
     std::map<std::string, Client *> nicknameToClientMap; // nickname -> client object
     std::set<int> clientsToDisconnect;
     RFC2812Handler rfcHandler;
     std::map<int, std::string> partialCommands;
-
 };
 
 #endif
