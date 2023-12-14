@@ -26,7 +26,10 @@ void sendJoinSuccessInfo(Server &server, const std::string &channelName, int cli
     std::set<std::string>::const_iterator it;
     for (it = users.begin(); it != users.end(); ++it)
     {
-        namesList += *it + " ";
+        if(channel->isOperator(*it))
+            namesList += "@" + *it + " ";
+        else
+            namesList += *it + " ";
     }
     namesList = namesList.substr(0, namesList.size() - 1);
 
