@@ -203,13 +203,12 @@ void Server::authenticateClient(int client_fd)
 
     // Check if a complete command (ending with "\r\n") is present
     size_t endPos;
-    while ((endPos = partialCommands[client_fd].find("\r\n")) != std::string::npos)
+    while ((endPos = partialCommands[client_fd].find("\n")) != std::string::npos)
     {
         // Extract the complete command
         std::string completeCommand = partialCommands[client_fd].substr(0, endPos);
 
         std::string debugCommand = completeCommand;
-        std::replace(debugCommand.begin(), debugCommand.end(), '\r', '|');
         std::replace(debugCommand.begin(), debugCommand.end(), '\n', '|');
         std::cout << LIGHT GRAY << "[" << client_fd - 3 << "] Command received : " << RESET << debugCommand << std::endl;
 
@@ -218,10 +217,14 @@ void Server::authenticateClient(int client_fd)
         std::string line;
         while (std::getline(f, line))
         {
+            if (line.find("\r") != std::string::npos)
+            {
+                line = line.substr(0, line.find("\r"));
+            }
             commandHandler->handleCommand(line, client_fd, *this);
         }
 
-        partialCommands[client_fd] = partialCommands[client_fd].substr(endPos + 2);
+        partialCommands[client_fd] = partialCommands[client_fd].substr(endPos + 1);
     }
 
     // Authentication check
@@ -275,13 +278,17 @@ int Server::readFromClient(Client &client)
 
         // Check if a complete command (ending with "\r\n") is present
         size_t endPos;
-        while ((endPos = partialCommands[client_fd].find("\r\n")) != std::string::npos)
+        while ((endPos = partialCommands[client_fd].find("\n")) != std::string::npos)
         {
             std::string completeCommand = partialCommands[client_fd].substr(0, endPos);
 
+            if (completeCommand.find("\r") != std::string::npos)
+            {
+                completeCommand = completeCommand.substr(0, completeCommand.find("\r"));
+            }
             commandHandler->handleCommand(completeCommand, client_fd, *this);
 
-            partialCommands[client_fd] = partialCommands[client_fd].substr(endPos + 2);
+            partialCommands[client_fd] = partialCommands[client_fd].substr(endPos + 1);
         }
 
         return 0;

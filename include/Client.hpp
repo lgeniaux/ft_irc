@@ -5,6 +5,10 @@
 #include <netinet/in.h>
 #include "Colors&Ascii.hpp"
 
+#define NOT_RECEIVED 0
+#define RECEIVED 1
+#define CONFLICT 2
+
 class Client
 {
 public:
@@ -27,8 +31,8 @@ public:
     void setPassReceived(bool state);
     bool isPassReceived() const;
 
-    void setNickReceived(bool state);
-    bool isNickReceived() const;
+    void setNickReceived(char state);
+    char isNickReceived() const;
 
     void setUserReceived(bool state);
     bool isUserReceived() const;
@@ -42,7 +46,7 @@ private:
     std::string realname;
 
     bool passReceived;
-    bool nickReceived;
+    char nickReceived;
     bool userReceived;
 };
 

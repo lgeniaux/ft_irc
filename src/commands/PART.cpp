@@ -5,18 +5,15 @@
 
 void CommandHandler::handlePART(const std::vector<std::string> &tokens, int client_fd, Server &server)
 {
-	std::pair<Channel *, Client> preCheck;
 	Channel *channel;
-	Client client;
+	Client& client = server.clients[client_fd];
 
 	if (tokens.size() < 2)
 	{
 		RFC2812Handler::sendResponse(461, server.clients[client_fd], "PART :Not enough parameters");
 		return;
 	}
-	preCheck = preChecks(tokens[1], client_fd, server, false);
-	channel = preCheck.first;
-	client = preCheck.second;
+	channel = preChecks(tokens[1], client_fd, server, false);
 	if (channel == NULL)
 		return;
 	std::string nickname = client.getNickname();

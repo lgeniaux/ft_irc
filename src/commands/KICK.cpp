@@ -5,20 +5,18 @@
 
 void CommandHandler::handleKICK(const std::vector<std::string> &tokens, int client_fd, Server &server)
 {
-    std::pair<Channel *, Client> preCheck;
     Channel *channel;
-    Client client;
+    Client& client = server.clients[client_fd];
 
     if (tokens.size() < 3)
     {
         RFC2812Handler::sendResponse(461, server.clients[client_fd], "KICK :Not enough parameters");
         return;
     }
-    preCheck = preChecks(tokens[1], client_fd, server, true);
-    channel = preCheck.first;
-    client = preCheck.second;
+    channel = preChecks(tokens[1], client_fd, server, true);
     if (channel == NULL)
         return;
+
     if (!channel->isInChannel(tokens[2]))
     {
         RFC2812Handler::sendResponse(441, server.clients[client_fd], tokens[2] + " " + tokens[1] + " :They aren't on that channel");

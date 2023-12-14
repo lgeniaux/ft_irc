@@ -1,7 +1,7 @@
 #include "Client.hpp"
 #include <cstring>
 
-Client::Client() : fd(-1), authenticated(false), passReceived(false), nickReceived(false), userReceived(false)
+Client::Client() : fd(-1), authenticated(false), passReceived(false), nickReceived(NOT_RECEIVED), userReceived(false)
 {
     memset(&address, 0, sizeof(address));
 }
@@ -71,12 +71,12 @@ bool Client::isPassReceived() const
     return passReceived;
 }
 
-void Client::setNickReceived(bool state)
+void Client::setNickReceived(char state)
 {
     nickReceived = state;
 }
 
-bool Client::isNickReceived() const
+char Client::isNickReceived() const
 {
     return nickReceived;
 }
