@@ -198,22 +198,33 @@ void Server::authenticateClient(int client_fd)
         return; // No data available yet, return and wait for more data
     }
 
-    std::string completeMessage(buffer, bytes_read);
-    std::istringstream f(completeMessage);
-    std::string line;
-    std::cout << LIGHT GRAY << "[" << client_fd - 3 << "] Authenticating client" << RESET << std::endl;
-    // debug print the data the user is sending
-    std::string debugMessage = completeMessage;
-    while (debugMessage.find("\r") != std::string::npos)
-        debugMessage.replace(debugMessage.find("\r"), 1, LIGHT PURPLE "\\r" RESET);
-    while (debugMessage.find("\n") != std::string::npos)
-        debugMessage.replace(debugMessage.find("\n"), 1, LIGHT PURPLE "\\n" RESET);
-    std::cout << LIGHT GRAY << "[" << client_fd - 3 << "] Data received : " << RESET << debugMessage << std::endl;
+    // Append new data to the existing partial command for this client
+    partialCommands[client_fd] += std::string(buffer, bytes_read);
 
-    while (std::getline(f, line))
+    // Check if a complete command (ending with "\r\n") is present
+    size_t endPos;
+    while ((endPos = partialCommands[client_fd].find("\r\n")) != std::string::npos)
     {
-        commandHandler->handleCommand(line, client_fd, *this);
+        // Extract the complete command
+        std::string completeCommand = partialCommands[client_fd].substr(0, endPos);
+
+        std::string debugCommand = completeCommand;
+        std::replace(debugCommand.begin(), debugCommand.end(), '\r', '|');
+        std::replace(debugCommand.begin(), debugCommand.end(), '\n', '|');
+        std::cout << LIGHT GRAY << "[" << client_fd - 3 << "] Command received : " << RESET << debugCommand << std::endl;
+
+        // Process the complete command
+        std::istringstream f(completeCommand);
+        std::string line;
+        while (std::getline(f, line))
+        {
+            commandHandler->handleCommand(line, client_fd, *this);
+        }
+
+        partialCommands[client_fd] = partialCommands[client_fd].substr(endPos + 2);
     }
+
+    // Authentication check
     if (clients[client_fd].isPassReceived() && clients[client_fd].isNickReceived() && clients[client_fd].isUserReceived())
     {
         clients[client_fd].setAuthenticated(true);
@@ -253,25 +264,30 @@ int Server::readFromClient(Client &client)
         int client_fd = client.getFd();
         char buffer[1024] = {0};
         ssize_t bytes_read = readFromSocket(client_fd, buffer, sizeof(buffer));
+        
         if (bytes_read <= 0)
         {
             return -1; // Client disconnected or error
         }
 
-        std::string message(buffer, bytes_read);
-        std::string debugMessage = message;
-        while (debugMessage.find("\r") != std::string::npos)
-            debugMessage.replace(debugMessage.find("\r"), 1, LIGHT PURPLE "\\r" RESET);
-        while (debugMessage.find("\n") != std::string::npos)
-            debugMessage.replace(debugMessage.find("\n"), 1, LIGHT PURPLE "\\n" RESET);
-        std::cout << LIGHT GRAY << "Received message: " << RESET << debugMessage << std::endl;
+        // Append new data to the existing partial command for this client
+        partialCommands[client_fd] += std::string(buffer, bytes_read);
 
-        // handle message as command
-        commandHandler->handleCommand(message, client_fd, *this);
+        // Check if a complete command (ending with "\r\n") is present
+        size_t endPos;
+        while ((endPos = partialCommands[client_fd].find("\r\n")) != std::string::npos)
+        {
+            std::string completeCommand = partialCommands[client_fd].substr(0, endPos);
+
+            commandHandler->handleCommand(completeCommand, client_fd, *this);
+
+            partialCommands[client_fd] = partialCommands[client_fd].substr(endPos + 2);
+        }
 
         return 0;
     }
 }
+
 
 ssize_t Server::readFromSocket(int client_fd, char *buffer, size_t size)
 {

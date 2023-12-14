@@ -46,6 +46,8 @@ private:
     std::map<std::string, Client *> nicknameToClientMap; // nickname -> client object
     std::set<int> clientsToDisconnect;
     RFC2812Handler rfcHandler;
+    std::map<int, std::string> partialCommands;
+
 };
 
 #endif
