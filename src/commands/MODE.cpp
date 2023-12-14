@@ -75,17 +75,6 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
         return;
     }
 
-    if (mode[1] != 'o') // 'o' is a special case (it can be set multiple times)
-    {
-        bool modeSet = channel->getMode(mode[1]);
-        // Check if the mode is already set (tricky conditions but it works xd)
-        if ((modeSet && modeSign == '+') || (!modeSet && modeSign == '-'))
-        {
-            rfcHandler.sendResponse(501, server.getClient(client_fd), "MODE :MODE flag is already set or unset");
-            return;
-        }
-    }
-
     // Check if the mode is valid
     if (mode[1] == 'k')
     {
@@ -97,14 +86,20 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
                 return;
             }
             channel->setKey(tokens[3]);
-            channel->setMode(mode[1], modeSign == '+');
+            channel->setMode(mode[1], true);
             rfcHandler.sendResponse(324, server.getClient(client_fd), channelName + " +" + mode[1] + " " + tokens[3]);
         }
-        else
+        else if (modeSign == '-')
         {
+            std::cout << channel->getMode(mode[1]) << std::endl;
+            if (channel->getMode(mode[1]) == false)
+            {
+                rfcHandler.sendResponse(501, server.getClient(client_fd), "MODE :flag is already set or unset");
+                return;
+            }
             channel->setKey("");
-            channel->setMode(mode[1], modeSign == '-');
-            rfcHandler.sendResponse(324, server.getClient(client_fd), channelName + " +" + mode[1] + " " + tokens[3]);
+            channel->setMode(mode[1], false);
+            rfcHandler.sendResponse(324, server.getClient(client_fd), channelName + " -" + mode[1]);
         }
     }
     else if (mode[1] == 'l')
@@ -117,14 +112,42 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
                 return;
             }
             channel->setLimit(atoi(tokens[3].c_str()));
-            channel->setMode(mode[1], modeSign == '+');
+            channel->setMode(mode[1], true);
             rfcHandler.sendResponse(324, server.getClient(client_fd), channelName + " +" + mode[1] + " " + tokens[3]);
         }
-        else
+        else if (modeSign == '-')
         {
+            if (channel->getMode(mode[1]) == false)
+            {
+                rfcHandler.sendResponse(501, server.getClient(client_fd), "MODE :flag is already set or unset");
+                return;
+            }
             channel->setLimit(0);
-            channel->setMode(mode[1], modeSign == '-');
-            rfcHandler.sendResponse(324, server.getClient(client_fd), channelName + " +" + mode[1] + " " + tokens[3]);
+            channel->setMode(mode[1], false);
+            rfcHandler.sendResponse(324, server.getClient(client_fd), channelName + " -" + mode[1]);
+        }
+    }
+    else if (mode[1] == 't')
+    {
+        if (modeSign == '+')
+        {
+            if (channel->getMode(mode[1]) == true)
+            {
+                rfcHandler.sendResponse(501, server.getClient(client_fd), "MODE :flag is already set or unset");
+                return;
+            }
+            channel->setMode(mode[1], true);
+            rfcHandler.sendResponse(324, server.getClient(client_fd), channelName + " +" + mode[1]);
+        }
+        else if (modeSign == '-')
+        {
+            if (channel->getMode(mode[1]) == false)
+            {
+                rfcHandler.sendResponse(501, server.getClient(client_fd), "MODE :flag is already set or unset");
+                return;
+            }
+            channel->setMode(mode[1], false);
+            rfcHandler.sendResponse(324, server.getClient(client_fd), channelName + " -" + mode[1]);
         }
     }
     else if (mode[1] == 'o')
