@@ -40,6 +40,8 @@ public:
     void setKey(std::string newKey);
     bool checkKey(std::string key) const;
 
+    void updateNickname(std::string oldNick, std::string newNick);
+
     void setLimit(int newLimit);
     size_t getLimit() const;
     // MESSAGES

@@ -173,8 +173,6 @@ void Server::acceptClient()
     }
 
     Client newClient(client_fd, client_address);
-    //debug print the whole clients map
-    std::cout << "Clients map: " << std::endl;
     for (std::map<int, Client>::iterator it = clients.begin(); it != clients.end(); ++it)
     {
         std::cout << it->first << " => " << it->second.getNickname() << std::endl;
@@ -238,14 +236,8 @@ void Server::authenticateClient(int client_fd)
         std::cout << GREEN << "USER received" << RESET << std::endl;
     else
         std::cout << RED << "USER not received" << RESET << std::endl;
-    if (clients.find(client_fd) != clients.end())
-    {
-        std::cout << "Client socket is still open" << RESET << std::endl;
-    }
-    else
-    {
+    if (clients.find(client_fd) == clients.end())
         std::cout << "Client socket is closed" << std::endl;
-    }
 }
 
 int Server::readFromClient(Client &client)
@@ -284,10 +276,10 @@ int Server::readFromClient(Client &client)
 ssize_t Server::readFromSocket(int client_fd, char *buffer, size_t size)
 {
     ssize_t bytes_read = recv(client_fd, buffer, size, 0);
-    std::cout << LIGHT GRAY << "[" << client_fd - 3 << "] bytes read: " << bytes_read << RESET << std::endl;
 
     if (bytes_read <= 0)
     {
+        std::cout << LIGHT GRAY << "[" << client_fd - 3 << "] bytes read: " << bytes_read << RESET << std::endl;
         if (bytes_read == 0)
         {
             // Normal disconnection
@@ -408,6 +400,10 @@ void Server::updateNicknameMap(const std::string &oldNick, const std::string &ne
     }
 
     nicknameToClientMap[newNick] = &client;
+    std::map<std::string, Channel>::iterator it;
+    for (it = channels.begin(); it != channels.end(); ++it)
+        if (it->second.isInChannel(oldNick))
+            it->second.updateNickname(oldNick, newNick);
 }
 
 int Server::getFdFromNickname(const std::string &nickname)
@@ -419,7 +415,21 @@ int Server::getFdFromNickname(const std::string &nickname)
     return -1;
 }
 
+void Server::removeFdFromNicknameMap(int fd)
+{
+    std::map<std::string, Client *>::iterator it;
+    for (it = nicknameToClientMap.begin(); it != nicknameToClientMap.end(); ++it)
+    {
+        if (it->second->getFd() == fd)
+        {
+            nicknameToClientMap.erase(it);
+            return;
+        }
+    }
+}
+
 void Server::markClientForDisconnection(int client_fd) {
+	removeFdFromNicknameMap(client_fd);
     clientsToDisconnect.insert(client_fd);
 }
 

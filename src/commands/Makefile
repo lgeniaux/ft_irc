@@ -6,7 +6,7 @@
 #    By: jcollon <jcollon@student.42lyon.fr>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/09/07 18:27:41 by jcollon           #+#    #+#              #
-#    Updated: 2023/12/13 17:06:57 by jcollon          ###   ########lyon.fr    #
+#    Updated: 2023/12/14 00:06:00 by jcollon          ###   ########lyon.fr    #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,6 +27,7 @@ SRC_FILE := INVITE.cpp \
 			QUIT.cpp \
 			PING.cpp \
 			PART.cpp \
+			utils.cpp
 
 OBJ_FILE := $(SRC_FILE:.cpp=.o)
 OBJ = $(addprefix $(DIR_OBJ)/, $(OBJ_FILE))

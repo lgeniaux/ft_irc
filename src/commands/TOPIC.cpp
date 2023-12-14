@@ -2,16 +2,19 @@
 #include <sstream>
 
 void CommandHandler::handleTOPIC(const std::vector<std::string>& tokens, int client_fd, Server& server) {
+    Channel *channel;
+    Client  client;
+    
     if (tokens.size() < 2) {
         RFC2812Handler::sendResponse(461, server.getClient(client_fd), "TOPIC :Not enough parameters");
         return;
     }
-    Client client = server.getClient(client_fd);
+    client = server.getClient(client_fd);
     if (!client.isAuthenticated()) {
         RFC2812Handler::sendResponse(451, server.getClient(client_fd), ":You have not registered");
         return;
     }
-    Channel *channel = server.getChannel(tokens[1]);
+    channel = server.getChannel(tokens[1]);
     if (channel == NULL) {
         RFC2812Handler::sendResponse(403, server.getClient(client_fd), tokens[1] + " :No such channel");
         return;

@@ -12,12 +12,6 @@ void CommandHandler::handleUSER(const std::vector<std::string>& tokens, int clie
         return;
     }
 
-    // std::cout << server.getFdFromNickname(tokens[1]) << std::endl;  
-    // if (server.getFdFromNickname(tokens[1]) != -1) {
-    //     RFC2812Handler::sendResponse(433, server.clients[client_fd], tokens[1] + " :Nickname is already in use");
-    //     return;
-    // }
-
     std::string username = tokens[1];
     std::string realname = tokens[4];
 

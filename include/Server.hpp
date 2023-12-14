@@ -26,16 +26,13 @@ public:
     void joinChannel(const std::string &name, std::string nickname);
     void leaveChannel(const std::string &name, std::string nickname);
     void handleChannelMessage(const std::string& channelName, const std::string& message, const std::string senderNick);
-    void handlePrivateMessage(const std::string& recipientNick, const std::string& message, int sender_fd);
     Channel* getChannel(const std::string& name);
     void updateNicknameMap(const std::string& oldNick, const std::string& newNick, Client& client);
+    void removeFdFromNicknameMap(int fd);
     friend class CommandHandler;  
     int getFdFromNickname(const std::string& nickname);
-    void checkNicknameCollision(int client_fd);
     void markClientForDisconnection(int client_fd);
     void disconnectMarkedClients(fd_set &readfds);
-
-
     
 private:
     int port;

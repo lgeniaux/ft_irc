@@ -5,6 +5,9 @@
 void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int client_fd, Server &server)
 {
     RFC2812Handler rfcHandler;
+    std::pair<Channel*, Client> preChecksResult;
+    Channel *channel;
+    Client client;
 
     if (tokens.size() < 3)
     {
@@ -12,7 +15,13 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
         return;
     }
 
-    const std::string &channelName = tokens[1];
+    preChecksResult = preChecks(tokens[1], client_fd, server, true);
+    channel = preChecksResult.first;
+    client = preChecksResult.second;
+    if (channel == NULL)
+        return;
+
+    const std::string channelName = tokens[1];
     const std::string &mode = tokens[2];
     // Arguments will be checked later in the code
 
@@ -38,27 +47,6 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
     if (mode.size() > 2)
     {
         rfcHandler.sendResponse(501, server.getClient(client_fd), "MODE :Unknown MODE flag");
-        return;
-    }
-
-    Channel *channel = server.getChannel(channelName);
-    if (channel == NULL)
-    {
-        rfcHandler.sendResponse(403, server.getClient(client_fd), channelName + " :No such channel");
-        return;
-    }
-
-    // Check if the client is in the channel
-    if (!channel->isInChannel(server.getClient(client_fd).getNickname()))
-    {
-        rfcHandler.sendResponse(442, server.getClient(client_fd), channelName + " :You're not on that channel");
-        return;
-    }
-
-    // Check if the client is an operator
-    if (!channel->isOperator(server.getClient(client_fd).getNickname()))
-    {
-        rfcHandler.sendResponse(482, server.getClient(client_fd), channelName + " :You're not channel operator");
         return;
     }
 
