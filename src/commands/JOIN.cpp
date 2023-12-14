@@ -10,9 +10,7 @@ void sendJoinSuccessInfo(Server &server, const std::string &channelName, int cli
     RFC2812Handler rfcHandler;
     Channel *channel = server.getChannel(channelName);
     if (!channel)
-    {
         return;
-    }
 
     // Send the topic of the channel
     if (!channel->getTopic().empty())
@@ -81,7 +79,9 @@ void CommandHandler::handleJOIN(const std::vector<std::string> &tokens, int clie
             key = std::string();
         }
 
-        Channel *channel = server.getChannel(channelName);
+        Channel *channel = preChecks(tokens[0], client_fd, server, false);
+        if (channel == NULL)
+            return;
         std::string clientNickname = server.getClient(client_fd).getNickname();
         if (clientNickname.empty())
             continue;

@@ -32,7 +32,7 @@ public:
     bool isPassReceived() const;
 
     void setNickReceived(char state);
-    char isNickReceived() const;
+    char getNickReceived() const;
 
     void setUserReceived(bool state);
     bool isUserReceived() const;

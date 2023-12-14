@@ -76,7 +76,7 @@ void Client::setNickReceived(char state)
     nickReceived = state;
 }
 
-char Client::isNickReceived() const
+char Client::getNickReceived() const
 {
     return nickReceived;
 }

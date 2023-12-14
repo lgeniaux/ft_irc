@@ -31,7 +31,7 @@ void RFC2812Handler::sendResponse(int code, Client &client, const std::string &m
     {
         formattedMessage.erase(formattedMessage.size() - 1);
     }
-    std::cout << LIGHT GRAY << "Sending :" << RESET << formattedMessage << std::endl;
+    std::cout << LIGHT BLUE << "Sending :" << RESET GRAY << formattedMessage << RESET << std::endl;
 }
 
 std::string RFC2812Handler::formatMessage(const std::string &message)

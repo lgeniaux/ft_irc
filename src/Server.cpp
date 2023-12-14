@@ -173,10 +173,6 @@ void Server::acceptClient()
     }
 
     Client newClient(client_fd, client_address);
-    for (std::map<int, Client>::iterator it = clients.begin(); it != clients.end(); ++it)
-    {
-        std::cout << it->first << " => " << it->second.getNickname() << std::endl;
-    }
 
     clients[client_fd] = newClient;
 
@@ -201,34 +197,22 @@ void Server::authenticateClient(int client_fd)
     // Append new data to the existing partial command for this client
     partialCommands[client_fd] += std::string(buffer, bytes_read);
 
-    // Check if a complete command (ending with "\r\n") is present
+    // Check if a complete command (ending with "\n") is present
     size_t endPos;
     while ((endPos = partialCommands[client_fd].find("\n")) != std::string::npos)
     {
-        // Extract the complete command
         std::string completeCommand = partialCommands[client_fd].substr(0, endPos);
-
-        std::string debugCommand = completeCommand;
-        std::replace(debugCommand.begin(), debugCommand.end(), '\n', '|');
-        std::cout << LIGHT GRAY << "[" << client_fd - 3 << "] Command received : " << RESET << debugCommand << std::endl;
-
         // Process the complete command
         std::istringstream f(completeCommand);
         std::string line;
         while (std::getline(f, line))
-        {
-            if (line.find("\r") != std::string::npos)
-            {
-                line = line.substr(0, line.find("\r"));
-            }
             commandHandler->handleCommand(line, client_fd, *this);
-        }
 
         partialCommands[client_fd] = partialCommands[client_fd].substr(endPos + 1);
     }
 
     // Authentication check
-    if (clients[client_fd].isPassReceived() && clients[client_fd].isNickReceived() && clients[client_fd].isUserReceived())
+    if (clients[client_fd].isPassReceived() && clients[client_fd].getNickReceived() == RECEIVED && clients[client_fd].isUserReceived())
     {
         clients[client_fd].setAuthenticated(true);
         RFC2812Handler::sendInitialConnectionMessages(clients[client_fd]);
@@ -242,8 +226,10 @@ void Server::authenticateClient(int client_fd)
         std::cout << GREEN << "PASS received" << RESET << " | ";
     else
         std::cout << RED << "PASS not received" << RESET << " | ";
-    if (clients[client_fd].isNickReceived())
+    if (clients[client_fd].getNickReceived() == RECEIVED)
         std::cout << GREEN << "NICK received" << RESET << " | ";
+    else if (clients[client_fd].getNickReceived() == CONFLICT)
+        std::cout << YELLOW << "NICK conflict" << RESET << " | ";
     else
         std::cout << RED << "NICK not received" << RESET << " | ";
     if (clients[client_fd].isUserReceived())
@@ -276,18 +262,12 @@ int Server::readFromClient(Client &client)
         // Append new data to the existing partial command for this client
         partialCommands[client_fd] += std::string(buffer, bytes_read);
 
-        // Check if a complete command (ending with "\r\n") is present
+        // Check if a complete command (ending with "\n") is present
         size_t endPos;
         while ((endPos = partialCommands[client_fd].find("\n")) != std::string::npos)
         {
             std::string completeCommand = partialCommands[client_fd].substr(0, endPos);
-
-            if (completeCommand.find("\r") != std::string::npos)
-            {
-                completeCommand = completeCommand.substr(0, completeCommand.find("\r"));
-            }
             commandHandler->handleCommand(completeCommand, client_fd, *this);
-
             partialCommands[client_fd] = partialCommands[client_fd].substr(endPos + 1);
         }
 
@@ -378,7 +358,7 @@ void Server::handleChannelMessage(const std::string &channelName, const std::str
     if (channels.find(channelName) != channels.end())
     {
         channels[channelName].broadcastMessageToChannel(message, *this, senderNick);
-        std::cout << "Message broadcasted to channel" << channelName << std::endl;
+        std::cout << LIGHT GRAY << "Message broadcasted to channel " << RESET << channelName << std::endl;
     }
     else
         std::cout << "Channel does not exist" << std::endl;
