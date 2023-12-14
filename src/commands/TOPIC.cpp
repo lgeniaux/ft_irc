@@ -1,4 +1,5 @@
 #include "Command.hpp"
+#include <sstream>
 
 void CommandHandler::handleTOPIC(const std::vector<std::string>& tokens, int client_fd, Server& server) {
     if (tokens.size() < 2) {
@@ -40,5 +41,8 @@ void CommandHandler::handleTOPIC(const std::vector<std::string>& tokens, int cli
     std::string message = ":" + client.getNickname() + " TOPIC " + tokens[1] + " :" + tokens[2] + "\r\n"; 
     channel->broadcastMessageToChannel(message, server, "");
     RFC2812Handler::sendResponse(332, server.getClient(client_fd), tokens[1] + " " + channel->getTopic());
-    RFC2812Handler::sendResponse(333, server.getClient(client_fd), tokens[1] + " " + client.getNickname() + " " + std::to_string(time(NULL)));
+    std::ostringstream oss;
+    oss << time(NULL);
+    RFC2812Handler::sendResponse(333, server.getClient(client_fd), tokens[1] + " " + client.getNickname() + " " + oss.str());
+
 }

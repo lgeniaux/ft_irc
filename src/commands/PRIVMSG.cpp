@@ -30,7 +30,8 @@ void CommandHandler::handlePRIVMSG(const std::vector<std::string> &tokens, int c
     }
     // Remove the trailing space
     if (message.size() > 0)
-        message.pop_back();
+        message.resize(message.size() - 1);
+
 
     // Debug
     // std::cout << "target: "

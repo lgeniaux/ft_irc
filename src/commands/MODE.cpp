@@ -110,7 +110,7 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
                 rfcHandler.sendResponse(461, server.getClient(client_fd), "MODE :Not enough parameters");
                 return;
             }
-            channel->setLimit(std::stoi(tokens[3]));
+            channel->setLimit(atoi(tokens[3].c_str()));
             channel->setMode(mode[1], modeSign == '+');
             rfcHandler.sendResponse(324, server.getClient(client_fd), channelName + " +" + mode[1] + " " + tokens[3]);
         }
