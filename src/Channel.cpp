@@ -149,3 +149,26 @@ void Channel::updateNickname(std::string oldNick, std::string newNick)
     users.erase(oldNick);
     users.insert(newNick);
 }
+
+//getModes (return a string with all the modes of the channel (like +nt for example)
+std::string Channel::getModes() const
+{
+    std::string modes;
+    if (getMode('t'))
+    {
+        modes += 't';
+    }
+    if (getMode('i'))
+    {
+        modes += 'i';
+    }
+    if (getMode('k'))
+    {
+        modes += 'k';
+    }
+    if (getMode('l'))
+    {
+        modes += 'l';
+    }
+    return modes;
+} 

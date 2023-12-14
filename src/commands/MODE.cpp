@@ -9,10 +9,28 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
     Channel *channel;
     Client client;
 
-    if (tokens.size() < 3)
+    if (tokens.size() == 2)
     {
-        rfcHandler.sendResponse(461, server.getClient(client_fd), "MODE :Not enough parameters");
-        return;
+        std::string channelName = tokens[1];
+        if (server.getChannel(channelName) == NULL)
+        {
+            rfcHandler.sendResponse(403, server.getClient(client_fd), channelName + " :No such channel");
+            return;
+        }
+        else
+        {
+            channel = server.getChannel(channelName);
+            if (!channel->isInChannel(server.getClient(client_fd).getNickname()))
+            {
+                rfcHandler.sendResponse(442, server.getClient(client_fd), channelName + " :You're not on that channel");
+                return;
+            }
+            else
+            {
+                rfcHandler.sendResponse(324, server.getClient(client_fd), channelName + " +" + channel->getModes());
+                return;
+            }
+        }
     }
 
     preChecksResult = preChecks(tokens[1], client_fd, server, true);
