@@ -162,9 +162,27 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
         else
             channel->removeOperator(tokens[3]);
     }
-    else if (mode[1] == 'i' || mode[1] == 't')
+    else if (mode[1] == 'i')
     {
-        channel->setMode(mode[1], modeSign == '+');
-        rfcHandler.sendResponse(324, server.getClient(client_fd), channelName + modeSign + mode[1]);
+        if (modeSign == '+')
+        {
+            if (channel->getMode(mode[1]) == true)
+            {
+                rfcHandler.sendResponse(501, server.getClient(client_fd), "MODE :flag is already set or unset");
+                return;
+            }
+            channel->setMode(mode[1], true);
+            rfcHandler.sendResponse(324, server.getClient(client_fd), channelName + " +" + mode[1]);
+        }
+        else if (modeSign == '-')
+        {
+            if (channel->getMode(mode[1]) == false)
+            {
+                rfcHandler.sendResponse(501, server.getClient(client_fd), "MODE :flag is already set or unset");
+                return;
+            }
+            channel->setMode(mode[1], false);
+            rfcHandler.sendResponse(324, server.getClient(client_fd), channelName + " -" + mode[1]);
+        }
     }
 }
