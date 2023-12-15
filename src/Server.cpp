@@ -13,7 +13,6 @@
 Server::Server(int port, const std::string &password)
     : port(port), password(password), server_fd(-1)
 {
-    commandHandler = new CommandHandler();
 }
 
 Server::~Server()
@@ -22,7 +21,6 @@ Server::~Server()
     {
         close(server_fd);
     }
-    delete commandHandler;
 }
 
 void Server::run()
