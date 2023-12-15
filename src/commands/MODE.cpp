@@ -1,6 +1,8 @@
 #include "Command.hpp"
 #include "RFC2812Handler.hpp"
 #include <algorithm>
+#include <sstream>
+
 
 void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int client_fd, Server &server)
 {
@@ -26,7 +28,12 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
             }
             else
             {
-                rfcHandler.sendResponse(324, client, channelName + " +" + channel->getModes());
+                std::ostringstream oss;
+                oss << channel->getLimit();
+                std::string limitStr = oss.str(); 
+                if limitStr == "0"
+                    limitStr = "";
+                rfcHandler.sendResponse(324, client, channelName + " " +channel->getModes() + " " + channel->getKey() + " " + limitStr);
                 return;
             }
         }
