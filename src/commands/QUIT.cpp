@@ -17,7 +17,6 @@ void CommandHandler::handleQUIT(const std::vector<std::string> &tokens, int clie
 		message += " " + tokens[i];
 	}
 	message += "\r\n";
-	std::map<std::string, Channel>::iterator it;
 	std::set<std::string> commonUsers = server.getCommonUsers(client.getNickname());
     bool isBroadcasted = false;
 
@@ -42,5 +41,13 @@ void CommandHandler::handleQUIT(const std::vector<std::string> &tokens, int clie
         }
     }
 
+	std::map<std::string, Channel>::iterator it;
+	for (it = server.channels.begin(); it != server.channels.end(); ++it)
+	{
+		if (it->second.isInChannel(client.getNickname()))
+		{
+			server.leaveChannel(it->second.getName(), client.getNickname());
+		}
+	}
 	server.markClientForDisconnection(client_fd);
 }
