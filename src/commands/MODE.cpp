@@ -31,7 +31,7 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
                 std::ostringstream oss;
                 oss << channel->getLimit();
                 std::string limitStr = oss.str(); 
-                if limitStr == "0"
+                if (limitStr == "0")
                     limitStr = "";
                 rfcHandler.sendResponse(324, client, channelName + " " +channel->getModes() + " " + channel->getKey() + " " + limitStr);
                 return;
