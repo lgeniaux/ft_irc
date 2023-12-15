@@ -445,3 +445,31 @@ void Server::disconnectMarkedClients(fd_set &readfds)
     }
     clientsToDisconnect.clear();
 }
+//broadcast message to a list of users
+void Server::broadcastMessageToUsers(const std::string &message, std::set<std::string> &users)
+{
+    std::set<std::string>::iterator it;
+    for (it = users.begin(); it != users.end(); ++it)
+    {
+        int fd = getFdFromNickname(*it);
+        if (fd != -1)
+        {
+            send(fd, message.c_str(), message.length(), 0);
+        }
+    }
+}
+
+std::set<std::string> Server::getCommonUsers(const std::string &nickname)
+{
+    std::set<std::string> users;
+    std::map<std::string, Channel>::iterator it;
+    for (it = channels.begin(); it != channels.end(); ++it)
+    {
+        if (it->second.isInChannel(nickname))
+        {
+            std::set<std::string> channelUsers = it->second.getUsers();
+            users.insert(channelUsers.begin(), channelUsers.end());
+        }
+    }
+    return users;
+}

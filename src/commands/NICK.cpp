@@ -56,9 +56,29 @@ void CommandHandler::handleNICK(const std::vector<std::string> &tokens, int clie
     client.setNickReceived(RECEIVED);
 
     std::map<std::string, Channel>::iterator it;
-    for (it = server.channels.begin(); it != server.channels.end(); ++it)
-        if (it->second.isInChannel(oldNick))
-            it->second.broadcastMessageToChannel(":" + oldNick + " NICK :" + newNick + "\r\n", server, "");
+    std::string message = ":" + oldNick + " NICK :" + newNick + "\r\n";
+    bool isBroadcasted = false;
+    std::set<std::string> commonUsers = server.getCommonUsers(oldNick);
+
+    // Broadcast the message to all user that shares a channel with the client
+    for (std::set<std::string>::iterator it = commonUsers.begin(); it != commonUsers.end(); ++it)
+    {
+        std::string nickname = *it;
+        int fd = server.getFdFromNickname(nickname);
+        if (fd != -1)
+        { // Check if fd is valid
+            send(fd, message.c_str(), message.length(), 0);
+            isBroadcasted = true;
+        }
+    }
+    
+    if (client.isAuthenticated() && !isBroadcasted)
+    {
+        if (client_fd != -1)
+        { // Check if fd is valid
+            send(client_fd, message.c_str(), message.length(), 0);
+        }
+    }
     // Update the nickname to client map in the server
     server.updateNicknameMap(oldNick, newNick, client);
 }

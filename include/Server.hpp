@@ -34,6 +34,9 @@ public:
     int getFdFromNickname(const std::string &nickname);
     void markClientForDisconnection(int client_fd);
     void disconnectMarkedClients(fd_set &readfds);
+    void broadcastMessageToUsers(const std::string &message, std::set<std::string> &users);
+    //Returns a list of all users which have a channel in common with the client without the duplicates
+    std::set<std::string> getCommonUsers(const std::string &nickname);
 
 private:
     int port;
