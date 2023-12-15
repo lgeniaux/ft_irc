@@ -39,6 +39,7 @@ public:
 
     void setKey(std::string newKey);
     bool checkKey(std::string key) const;
+    std::string getKey() const;
 
     void updateNickname(std::string oldNick, std::string newNick);
 

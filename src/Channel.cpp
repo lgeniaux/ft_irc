@@ -5,7 +5,7 @@
 #include <iostream>
 
 Channel::Channel(const std::string &name, const std::string &topic, const std::time_t &topicTime)
-    : name(name), topic(topic), topicTime(topicTime)
+    : name(name), topic(topic), topicTime(topicTime), key(""), limit(0)
 {
 }
 
@@ -118,6 +118,11 @@ bool Channel::isInChannel(std::string nickname) const
 void Channel::setKey(std::string newKey)
 {
     key = newKey;
+}
+
+std::string Channel::getKey() const
+{
+    return key;
 }
 
 bool Channel::checkKey(std::string key) const

@@ -11,7 +11,7 @@
 /* ************************************************************************** */
 
 #include "Command.hpp"
-
+#include <sstream>
 Channel* CommandHandler::preChecks(const std::string channelName, int client_fd, Server &server, const bool needOp)
 {
 	Channel *channel;
@@ -35,7 +35,7 @@ Channel* CommandHandler::preChecks(const std::string channelName, int client_fd,
 		return (NULL);
 	}
 	if (needOp && !channel->isOperator(client.getNickname()))
-	{
+	{	
 		RFC2812Handler::sendResponse(482, server.clients[client_fd], channelName + " :You're not channel operator");
 		return (NULL);
 	}
