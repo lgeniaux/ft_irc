@@ -22,7 +22,7 @@ void RFC2812Handler::sendResponse(int code, Client &client, const std::string &m
 {
     int fd = client.getFd();
     std::ostringstream oss;
-    oss << ": " << code << " " << client.getNickname() << " " << message;
+    oss << ":localhost " << code << " " << client.getNickname() << " " << message;
     std::string formattedMessage = formatMessage(oss.str());
     send(fd, formattedMessage.c_str(), formattedMessage.size(), 0);
     while (!formattedMessage.empty() &&
