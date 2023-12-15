@@ -79,9 +79,7 @@ void CommandHandler::handleJOIN(const std::vector<std::string> &tokens, int clie
             key = std::string();
         }
 
-        Channel *channel = preChecks(tokens[0], client_fd, server, false);
-        if (channel == NULL)
-            return;
+        Channel *channel = server.getChannel(channelName);
         std::string clientNickname = server.getClient(client_fd).getNickname();
         if (clientNickname.empty())
             continue;
