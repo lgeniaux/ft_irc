@@ -50,4 +50,8 @@ private:
     std::map<int, std::string> partialCommands;
 };
 
+    // std::set<std::string> users;
+    // std::set<std::string> operators;
+    // std::map<std::string, Client *> nicknameToClientMap;
+
 #endif

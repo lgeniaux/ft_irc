@@ -49,6 +49,7 @@ public:
     std::string getModes() const;
 
     std::set<std::string> getUsers() const;
+    void updateOperatorNickname(std::string oldNick, std::string newNick);
 
 private:
     std::string name;

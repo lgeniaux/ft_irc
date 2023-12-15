@@ -148,6 +148,14 @@ void Channel::updateNickname(std::string oldNick, std::string newNick)
 {
     users.erase(oldNick);
     users.insert(newNick);
+    if (operators.find(oldNick) != operators.end())
+        updateOperatorNickname(oldNick, newNick);
+}
+
+void Channel::updateOperatorNickname(std::string oldNick, std::string newNick)
+{
+    operators.erase(oldNick);
+    operators.insert(newNick);
 }
 
 //getModes (return a string with all the modes of the channel (like +nt for example)

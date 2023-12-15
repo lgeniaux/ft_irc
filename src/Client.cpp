@@ -26,6 +26,7 @@ int Client::getFd() const
     return fd;
 }
 
+
 void Client::setNickname(const std::string &name)
 {
     nickname = name;
