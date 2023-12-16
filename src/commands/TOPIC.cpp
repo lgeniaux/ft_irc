@@ -52,9 +52,16 @@ void CommandHandler::handleTOPIC(const std::vector<std::string> &tokens, int cli
         channel->setTopic("");
         return;
     }
-    channel->setTopic(tokens[2]);
+    std::string topic = "";
+    for (size_t i = 2; i < tokens.size(); i++)
+    {
+        topic += tokens[i];
+        if (i != tokens.size() - 1)
+            topic += " ";
+    }
+    channel->setTopic(topic);
     channel->setTopicTime(time(NULL));
-    std::string message = ":" + nickname + "!" + client.getUsername() + "@" + inet_ntoa(client.getAddress().sin_addr) + " TOPIC " + tokens[1] + " :" + tokens[2] + "\r\n";
+    std::string message = ":" + nickname + "!" + client.getUsername() + "@" + inet_ntoa(client.getAddress().sin_addr) + " TOPIC " + tokens[1] + " :" + topic + "\r\n";
     channel->broadcastMessageToChannel(message, server, "");
     RFC2812Handler::sendResponse(332, server.getClient(client_fd), tokens[1] + " " + channel->getTopic());
     std::ostringstream oss;
