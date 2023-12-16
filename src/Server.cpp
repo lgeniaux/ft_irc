@@ -10,9 +10,15 @@
 #include <arpa/inet.h>
 #include "Command.hpp"
 #include "RFC2812Handler.hpp"
+#include <csignal>
+
+//STATIC VARIABLES INITIALIZATION
+int Server::server_fd = 0;
+std::map<int, Client> Server::clients;
+bool Server::shutdown_flag = false;
 
 Server::Server(int port, const std::string &password)
-    : port(port), password(password), server_fd(-1)
+    : port(port), password(password)
 {
 }
 
@@ -23,6 +29,23 @@ Server::~Server()
         close(server_fd);
     }
 }
+
+void Server::signalHandler(int signum)
+{
+    std::cout << "Interrupt signal (" << signum << ") received.\n";
+
+    // Close all client sockets
+    for (std::map<int, Client>::iterator it = clients.begin(); it != clients.end(); ++it)
+    {
+        close(it->first);
+    }
+
+    // Close server socket
+    close(server_fd);
+
+    shutdown_flag = true;
+}
+
 
 void Server::run()
 {
@@ -72,7 +95,9 @@ void Server::run()
     fd_set readfds;
     int max_sd;
 
-    while (true)
+    signal(SIGINT, Server::signalHandler);
+
+    while (!shutdown_flag)
     {
         std::cout << LIGHT GRAY << "Server loop iteration" << RESET << std::endl;
         FD_ZERO(&readfds);
@@ -124,6 +149,7 @@ void Server::run()
         }
         disconnectMarkedClients(readfds);
     }
+    std::cout << "Server shutting down..." << std::endl;
 }
 
 void Server::acceptClient()

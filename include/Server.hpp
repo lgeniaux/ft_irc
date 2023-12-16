@@ -39,19 +39,22 @@ public:
     //Returns a list of all users which have a channel in common with the client without the duplicates
     std::set<std::string> getCommonUsers(const std::string &nickname);
     void serverKick(const std::string channelName, int client_fd);
+    static void signalHandler(int signal);
+
 private:
     int port;
     std::string password;
-    int server_fd;
+    static int server_fd;
     sockaddr_in address;
     CommandHandler *commandHandler;
-    std::map<int, Client> clients;
+    static std::map<int, Client> clients;
     ssize_t readFromSocket(int client_fd, char *buffer, size_t size);
     std::map<std::string, Channel> channels;             // name -> channel object
     std::map<std::string, Client *> nicknameToClientMap; // nickname -> client object
     std::set<int> clientsToDisconnect;
     RFC2812Handler rfcHandler;
     std::map<int, std::string> partialCommands;
+    static bool shutdown_flag;
 };
 
     // std::set<std::string> users;
