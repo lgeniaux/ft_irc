@@ -40,7 +40,7 @@ void CommandHandler::handleINVITE(const std::vector<std::string> &tokens, int cl
     if (channel == NULL)
     {
         std::cout << "Channel does not exist" << std::endl;
-        rfcHandler.sendResponse(403, server.getClient(client_fd), channelName + " :No such channel");
+        rfcHandler.sendResponse(403, server.getClient(client_fd), server.getClient(client_fd).getNickname() + " " + channelName + " :No such channel");
         return;
     }
 
@@ -56,7 +56,7 @@ void CommandHandler::handleINVITE(const std::vector<std::string> &tokens, int cl
     if (channel->isInChannel(recipientNickname))
     {
         std::cout << "User is already in channel" << std::endl;
-        rfcHandler.sendResponse(443, server.getClient(client_fd), recipientNickname + " " + channelName + " :is already on channel");
+        rfcHandler.sendResponse(443, server.getClient(client_fd), server.getClient(client_fd).getNickname() + " " + recipientNickname + " " + channelName + " :is already on channel");
         return;
     }
 

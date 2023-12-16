@@ -22,10 +22,10 @@ void RFC2812Handler::sendResponse(int code, Client &client, const std::string &m
 {
     int fd = client.getFd();
     std::ostringstream oss;
-    if (code < 400 || code >= 500)
-        oss << ":localhost " << code << " " << client.getNickname() << " " << message;
-    else
+    if (code == 482 || code == 461 || code == 442 || code == 441 || code == 331)
         oss << ":localhost " << code << " " << message;
+    else
+        oss << ":localhost " << code << " " << client.getNickname() << " " << message;
     std::string formattedMessage = formatMessage(oss.str());
     send(fd, formattedMessage.c_str(), formattedMessage.size(), 0);
     while (!formattedMessage.empty() &&
