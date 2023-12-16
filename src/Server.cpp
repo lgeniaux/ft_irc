@@ -459,7 +459,7 @@ void Server::broadcastMessageToUsers(const std::string &message, std::set<std::s
         if (fd != -1)
             send(fd, message.c_str(), message.length(), 0);
     }
-    std::cout << ")" << std::endl;
+    std::cout << ")" << RESET << std::endl;
 }
 
 std::set<std::string> Server::getCommonUsers(const std::string &nickname)
