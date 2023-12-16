@@ -36,7 +36,7 @@ public:
     void markClientForDisconnection(int client_fd);
     void disconnectMarkedClients(fd_set &readfds);
     void broadcastMessageToUsers(const std::string &message, std::set<std::string> &users);
-    //Returns a list of all users which have a channel in common with the client without the duplicates
+    // Returns a list of all users which have a channel in common with the client without the duplicates
     std::set<std::string> getCommonUsers(const std::string &nickname);
     void serverKick(const std::string channelName, int client_fd);
     static void signalHandler(int signal);
@@ -56,9 +56,5 @@ private:
     std::map<int, std::string> partialCommands;
     static bool shutdown_flag;
 };
-
-    // std::set<std::string> users;
-    // std::set<std::string> operators;
-    // std::map<std::string, Client *> nicknameToClientMap;
 
 #endif

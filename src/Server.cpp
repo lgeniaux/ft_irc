@@ -12,7 +12,7 @@
 #include "RFC2812Handler.hpp"
 #include <csignal>
 
-//STATIC VARIABLES INITIALIZATION
+// STATIC VARIABLES INITIALIZATION
 int Server::server_fd = 0;
 std::map<int, Client> Server::clients;
 bool Server::shutdown_flag = false;
@@ -32,8 +32,7 @@ Server::~Server()
 
 void Server::signalHandler(int signum)
 {
-    std::cout << "Interrupt signal (" << signum << ") received.\n";
-
+    (void)signum;
     // Close all client sockets
     for (std::map<int, Client>::iterator it = clients.begin(); it != clients.end(); ++it)
     {
@@ -45,7 +44,6 @@ void Server::signalHandler(int signum)
 
     shutdown_flag = true;
 }
-
 
 void Server::run()
 {
@@ -64,7 +62,7 @@ void Server::run()
         return;
     }
 
-    //set the socket to non-blocking mode
+    // set the socket to non-blocking mode
     if (fcntl(server_fd, F_SETFL, O_NONBLOCK) < 0)
     {
         std::cerr << ERROR << "Failed to set server socket to non-blocking" << std::endl;
@@ -118,7 +116,9 @@ void Server::run()
 
         if (activity < 0)
         {
+            std::cerr << LIGHT GRAY;    
             perror("select error");
+            std::cerr << RESET;
         }
 
         if (FD_ISSET(server_fd, &readfds))
@@ -338,12 +338,6 @@ void Server::leaveChannel(const std::string &name, std::string nickname)
 
 void Server::handleChannelMessage(const std::string &channelName, const std::string &message, std::string senderNick)
 {
-    // DEBUG
-    // std::cout << "Handling channel message" << std::endl;
-    // std::cout << "Channel name: " << channelName << std::endl;
-    // std::cout << "Message: " << message << std::endl;
-    // list all existing channel for debug
-    // std::cout << "Existing channels: " << std::endl;
     if (channels.find(channelName) != channels.end())
     {
         channels[channelName].broadcastMessageToChannel(message, *this, senderNick);
@@ -440,7 +434,7 @@ void Server::disconnectMarkedClients(fd_set &readfds)
     }
     clientsToDisconnect.clear();
 }
-//broadcast message to a list of users
+// broadcast message to a list of users
 void Server::broadcastMessageToUsers(const std::string &message, std::set<std::string> &users)
 {
     std::cout << LIGHT YELLOW << "Broadcasting message to users: " << RESET << message.substr(0, message.length() - 2) << LIGHT GRAY << "(";
@@ -470,10 +464,9 @@ std::set<std::string> Server::getCommonUsers(const std::string &nickname)
     return users;
 }
 
-
 void Server::serverKick(const std::string channelName, int client_fd)
 {
-    Client& client = clients[client_fd];
+    Client &client = clients[client_fd];
     Channel *channel = getChannel(channelName);
     std::string message = ":server!server@localhost KICK " + channelName + " " + client.getNickname() + " ";
     message += ":Use of forbidden command";

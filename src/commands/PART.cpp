@@ -7,7 +7,7 @@
 void CommandHandler::handlePART(const std::vector<std::string> &tokens, int client_fd, Server &server)
 {
 	Channel *channel;
-	Client& client = server.clients[client_fd];
+	Client &client = server.clients[client_fd];
 
 	if (tokens.size() < 2)
 	{

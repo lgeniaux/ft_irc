@@ -3,7 +3,7 @@
 
 void CommandHandler::handleNICK(const std::vector<std::string> &tokens, int client_fd, Server &server)
 {
-    Client& client = server.clients[client_fd];
+    Client &client = server.clients[client_fd];
 
     if (tokens.size() < 2)
     {
@@ -44,9 +44,7 @@ void CommandHandler::handleNICK(const std::vector<std::string> &tokens, int clie
     }
 
     // Check if the nickname is valid
-    if (newNick.size() > 9
-        || newNick.find_first_of("0123456789-") == 0
-        || newNick.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-[]\\`^{}|_") != std::string::npos)
+    if (newNick.size() > 9 || newNick.find_first_of("0123456789-") == 0 || newNick.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-[]\\`^{}|_") != std::string::npos)
     {
         RFC2812Handler::sendResponse(432, client, ":Erroneous nickname");
         return;
@@ -68,7 +66,7 @@ void CommandHandler::handleNICK(const std::vector<std::string> &tokens, int clie
         commonUsers.insert(oldNick);
 
     server.broadcastMessageToUsers(message, commonUsers);
-    
+
     // Update the nickname to client map in the server
     server.updateNicknameMap(oldNick, newNick, client);
     server.updateNickChannels(oldNick, newNick);

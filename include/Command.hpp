@@ -15,7 +15,7 @@ public:
     void handleCommand(const std::string &command, int client_fd, Server &server);
 
 private:
-    static Channel* preChecks(const std::string nickname, int client_fd, Server &server, const bool needOp);
+    static Channel *preChecks(const std::string nickname, int client_fd, Server &server, const bool needOp);
     static void handleKICK(const std::vector<std::string> &tokens, int client_fd, Server &server);
     static void handleINVITE(const std::vector<std::string> &tokens, int client_fd, Server &server);
     static void handleTOPIC(const std::vector<std::string> &tokens, int client_fd, Server &server);

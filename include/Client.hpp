@@ -14,7 +14,7 @@ class Client
 public:
     Client();
     Client(int fd, const sockaddr_in &clientAddress);
-    
+
     bool isAuthenticated() const;
     void setAuthenticated(bool auth);
     int getFd() const;
@@ -38,7 +38,7 @@ public:
     void setUserReceived(bool state);
     bool isUserReceived() const;
 
-    //getHost (e.g localhost)
+    // getHost (e.g localhost)
     std::string getHost() const;
 
 private:

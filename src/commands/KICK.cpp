@@ -7,7 +7,7 @@
 void CommandHandler::handleKICK(const std::vector<std::string> &tokens, int client_fd, Server &server)
 {
     Channel *channel;
-    Client& client = server.clients[client_fd];
+    Client &client = server.clients[client_fd];
 
     if (tokens.size() < 3)
     {
@@ -29,7 +29,7 @@ void CommandHandler::handleKICK(const std::vector<std::string> &tokens, int clie
         return;
     }
     std::cout << tokens[1] << std::endl;
- 
+
     std::string message = ":" + client.getNickname() + "!" + client.getUsername() + "@" + inet_ntoa(client.getAddress().sin_addr) + " KICK " + tokens[1] + " " + tokens[2] + " ";
     if (tokens.size() > 3 && tokens[3] != ":")
         message += tokens[3];

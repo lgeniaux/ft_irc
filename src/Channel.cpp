@@ -165,7 +165,7 @@ void Channel::updateOperatorNickname(std::string oldNick, std::string newNick)
     operators.insert(newNick);
 }
 
-//getModes (return a string with all the modes of the channel (like +nt for example)
+// getModes (return a string with all the modes of the channel (like +nt for example)
 std::string Channel::getModes() const
 {
     std::string modes;
@@ -186,4 +186,4 @@ std::string Channel::getModes() const
         modes += 'l';
     }
     return modes;
-} 
+}

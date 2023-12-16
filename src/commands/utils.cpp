@@ -6,16 +6,16 @@
 /*   By: lgeniaux <lgeniaux@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/13 23:48:50 by jcollon           #+#    #+#             */
-/*   Updated: 2023/12/16 12:29:10 by lgeniaux         ###   ########.fr       */
+/*   Updated: 2023/12/16 16:00:30 by lgeniaux         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Command.hpp"
 #include <sstream>
-Channel* CommandHandler::preChecks(const std::string channelName, int client_fd, Server &server, const bool needOp)
+Channel *CommandHandler::preChecks(const std::string channelName, int client_fd, Server &server, const bool needOp)
 {
 	Channel *channel;
-	Client& client = server.getClient(client_fd);
+	Client &client = server.getClient(client_fd);
 
 	std::cout << client.isAuthenticated() << std::endl;
 	if (!client.isAuthenticated())
@@ -35,7 +35,7 @@ Channel* CommandHandler::preChecks(const std::string channelName, int client_fd,
 		return (NULL);
 	}
 	if (needOp && !channel->isOperator(client.getNickname()))
-	{	
+	{
 		RFC2812Handler::sendResponse(482, server.clients[client_fd], channelName + " :You're not channel operator");
 		server.serverKick(channelName, client_fd);
 		return (NULL);

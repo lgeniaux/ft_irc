@@ -11,7 +11,6 @@ Client::Client(int fd, const sockaddr_in &clientAddress)
 {
 }
 
-
 bool Client::isAuthenticated() const
 {
     return authenticated;
@@ -26,7 +25,6 @@ int Client::getFd() const
 {
     return fd;
 }
-
 
 void Client::setNickname(const std::string &name)
 {
@@ -92,4 +90,3 @@ bool Client::isUserReceived() const
 {
     return userReceived;
 }
-
