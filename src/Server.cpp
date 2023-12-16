@@ -450,7 +450,7 @@ void Server::disconnectMarkedClients(fd_set &readfds)
 //broadcast message to a list of users
 void Server::broadcastMessageToUsers(const std::string &message, std::set<std::string> &users)
 {
-    std::cout << LIGHT YELLOW << "Broadcasting message to users: " << RESET << message.substr(0, message.length() - 2) << "(";
+    std::cout << LIGHT YELLOW << "Broadcasting message to users: " << RESET << message.substr(0, message.length() - 2) << LIGHT GRAY << "(";
     std::set<std::string>::iterator it;
     for (it = users.begin(); it != users.end(); ++it)
     {

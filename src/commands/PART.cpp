@@ -19,8 +19,9 @@ void CommandHandler::handlePART(const std::vector<std::string> &tokens, int clie
 		return;
 	std::string nickname = client.getNickname();
 	std::string message = "";
-	if (tokens.size() > 2 && tokens[2] != ":")
-		message = " " + tokens[2];
+	if (tokens.size() > 2)
+		for (size_t i = 2; i < tokens.size(); i++)
+			message += " " + tokens[i];
 	channel->broadcastMessageToChannel(":" + nickname + "!" + nickname + "@" + inet_ntoa(client.getAddress().sin_addr) + " PART " + channel->getName() + message + "\r\n", server, "");
 	server.leaveChannel(channel->getName(), nickname);
 }

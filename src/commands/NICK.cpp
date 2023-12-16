@@ -46,7 +46,7 @@ void CommandHandler::handleNICK(const std::vector<std::string> &tokens, int clie
     // Check if the nickname is valid
     if (newNick.size() > 9
         || newNick.find_first_of("0123456789-") == 0
-        || newNick.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-[]\\`^{}|") != std::string::npos)
+        || newNick.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-[]\\`^{}|_") != std::string::npos)
     {
         RFC2812Handler::sendResponse(432, client, ":Erroneous nickname");
         return;
@@ -63,28 +63,12 @@ void CommandHandler::handleNICK(const std::vector<std::string> &tokens, int clie
 
     std::map<std::string, Channel>::iterator it;
     std::string message = ":" + oldNick + " NICK :" + newNick + "\r\n";
-    bool isBroadcasted = false;
     std::set<std::string> commonUsers = server.getCommonUsers(oldNick);
+    if (commonUsers.size() == 0)
+        commonUsers.insert(oldNick);
 
-    // Broadcast the message to all user that shares a channel with the client
-    for (std::set<std::string>::iterator it = commonUsers.begin(); it != commonUsers.end(); ++it)
-    {
-        std::string nickname = *it;
-        int fd = server.getFdFromNickname(nickname);
-        if (fd != -1)
-        { // Check if fd is valid
-            send(fd, message.c_str(), message.length(), 0);
-            isBroadcasted = true;
-        }
-    }
+    server.broadcastMessageToUsers(message, commonUsers);
     
-    if (client.isAuthenticated() && !isBroadcasted)
-    {
-        if (client_fd != -1)
-        { // Check if fd is valid
-            send(client_fd, message.c_str(), message.length(), 0);
-        }
-    }
     // Update the nickname to client map in the server
     server.updateNicknameMap(oldNick, newNick, client);
     server.updateNickChannels(oldNick, newNick);
