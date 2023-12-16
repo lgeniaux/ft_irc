@@ -1,10 +1,12 @@
 #include "Command.hpp"
 #include <sstream>
+#include <arpa/inet.h>
 
 void CommandHandler::handleTOPIC(const std::vector<std::string> &tokens, int client_fd, Server &server)
 {
     Channel *channel;
     Client client;
+    std::string nickname;
 
     if (tokens.size() < 2)
     {
@@ -17,6 +19,7 @@ void CommandHandler::handleTOPIC(const std::vector<std::string> &tokens, int cli
         RFC2812Handler::sendResponse(451, server.getClient(client_fd), ":You have not registered");
         return;
     }
+    nickname = client.getNickname();
     channel = server.getChannel(tokens[1]);
     if (channel == NULL)
     {
@@ -51,7 +54,7 @@ void CommandHandler::handleTOPIC(const std::vector<std::string> &tokens, int cli
     }
     channel->setTopic(tokens[2]);
     channel->setTopicTime(time(NULL));
-    std::string message = ":" + client.getNickname() + " TOPIC " + tokens[1] + " :" + tokens[2] + "\r\n";
+    std::string message = ":" + nickname + "!" + client.getUsername() + "@" + inet_ntoa(client.getAddress().sin_addr) + " TOPIC " + tokens[1] + " :" + tokens[2] + "\r\n";
     channel->broadcastMessageToChannel(message, server, "");
     RFC2812Handler::sendResponse(332, server.getClient(client_fd), tokens[1] + " " + channel->getTopic());
     std::ostringstream oss;
