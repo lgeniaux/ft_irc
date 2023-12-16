@@ -149,7 +149,7 @@ void Server::run()
         }
         disconnectMarkedClients(readfds);
     }
-    std::cout << "Server shutting down..." << std::endl;
+    std::cout << INFO << "Server shutting down..." << std::endl;
 }
 
 void Server::acceptClient()

@@ -6,7 +6,7 @@
 /*   By: lgeniaux <lgeniaux@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/13 23:48:50 by jcollon           #+#    #+#             */
-/*   Updated: 2023/12/16 16:00:30 by lgeniaux         ###   ########.fr       */
+/*   Updated: 2023/12/16 17:34:56 by lgeniaux         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,6 @@ Channel *CommandHandler::preChecks(const std::string channelName, int client_fd,
 	Channel *channel;
 	Client &client = server.getClient(client_fd);
 
-	std::cout << client.isAuthenticated() << std::endl;
 	if (!client.isAuthenticated())
 	{
 		RFC2812Handler::sendResponse(451, server.clients[client_fd], ":You have not registered");

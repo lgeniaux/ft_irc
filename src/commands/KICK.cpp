@@ -28,7 +28,6 @@ void CommandHandler::handleKICK(const std::vector<std::string> &tokens, int clie
         RFC2812Handler::sendResponse(401, server.clients[client_fd], tokens[2] + " :No such nick/channel");
         return;
     }
-    std::cout << tokens[1] << std::endl;
 
     std::string message = ":" + client.getNickname() + "!" + client.getUsername() + "@" + inet_ntoa(client.getAddress().sin_addr) + " KICK " + tokens[1] + " " + tokens[2] + " ";
     if (tokens.size() > 3 && tokens[3] != ":")
