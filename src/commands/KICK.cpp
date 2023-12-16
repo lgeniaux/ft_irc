@@ -20,7 +20,7 @@ void CommandHandler::handleKICK(const std::vector<std::string> &tokens, int clie
 
     if (!channel->isInChannel(tokens[2]))
     {
-        RFC2812Handler::sendResponse(441, server.clients[client_fd], tokens[2] + " " + tokens[1] + " :They aren't on that channel");
+        RFC2812Handler::sendResponse(441, server.clients[client_fd], tokens[1] + " :They aren't on that channel");
         return;
     }
     if (server.getFdFromNickname(tokens[2]) == -1)

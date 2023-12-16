@@ -466,13 +466,3 @@ std::set<std::string> Server::getCommonUsers(const std::string &nickname)
     }
     return users;
 }
-
-void Server::serverKick(const std::string channelName, int client_fd)
-{
-    Client &client = clients[client_fd];
-    Channel *channel = getChannel(channelName);
-    std::string message = ":server!server@localhost KICK " + channelName + " " + client.getNickname() + " ";
-    message += ":Use of forbidden command";
-    channel->broadcastMessageToChannel(message + "\r\n", *this, "");
-    leaveChannel(channelName, client.getNickname());
-}

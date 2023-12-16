@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lgeniaux <lgeniaux@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jcollon <jcollon@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/13 23:48:50 by jcollon           #+#    #+#             */
-/*   Updated: 2023/12/16 17:34:56 by lgeniaux         ###   ########.fr       */
+/*   Updated: 2023/12/16 18:11:41 by jcollon          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,6 @@ Channel *CommandHandler::preChecks(const std::string channelName, int client_fd,
 	if (needOp && !channel->isOperator(client.getNickname()))
 	{
 		RFC2812Handler::sendResponse(482, server.clients[client_fd], channelName + " :You're not channel operator");
-		server.serverKick(channelName, client_fd);
 		return (NULL);
 	}
 	return (channel);

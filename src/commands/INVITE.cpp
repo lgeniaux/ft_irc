@@ -32,7 +32,6 @@ void CommandHandler::handleINVITE(const std::vector<std::string> &tokens, int cl
     if (channel->getMode('i') && !channel->isOperator(server.getClient(client_fd).getNickname()))
     {
         std::cout << "Channel is invite only and the sending client is not an operator" << std::endl;
-        server.serverKick(channelName, client_fd);
         rfcHandler.sendResponse(482, server.getClient(client_fd), channelName + " :You're not channel operator");
         return;
     }

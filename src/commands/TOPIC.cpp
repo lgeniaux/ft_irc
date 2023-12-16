@@ -43,7 +43,6 @@ void CommandHandler::handleTOPIC(const std::vector<std::string> &tokens, int cli
     }
     if (!channel->isOperator(client.getNickname()) && channel->getMode('t') == true)
     {
-        server.serverKick(tokens[1], client_fd);
         RFC2812Handler::sendResponse(482, server.getClient(client_fd), tokens[1] + " :You're not channel operator");
         return;
     }
