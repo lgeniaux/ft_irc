@@ -6,8 +6,9 @@
 #include <map>
 #include <unistd.h>
 
-void CommandHandler::handleCommand(const std::string &command, int client_fd, Server &server)
+void CommandHandler::handleCommand(const std::string &command, int client_fd, Server &server, bool login)
 {
+
     std::istringstream iss(command);
     std::istream_iterator<std::string> issIt(iss);
     std::istream_iterator<std::string> end;
@@ -45,7 +46,12 @@ void CommandHandler::handleCommand(const std::string &command, int client_fd, Se
         std::cout << " " << tokens[i];
     std::cout << RESET << std::endl;
     if (commandRegistry.find(cmd) != commandRegistry.end())
-    {
+    {   
+        if (login)
+        {
+            if (tokens[0] != "USER" && tokens[0] != "NICK" && tokens[0] != "PASS")
+                return;
+        }
         commandRegistry[cmd](tokens, client_fd, server);
         return;
     }

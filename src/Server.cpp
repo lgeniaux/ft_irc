@@ -205,7 +205,7 @@ void Server::authenticateClient(int client_fd)
         std::istringstream f(completeCommand);
         std::string line;
         while (std::getline(f, line))
-            commandHandler->handleCommand(line, client_fd, *this);
+            commandHandler->handleCommand(line, client_fd, *this, true);
 
         partialCommands[client_fd] = partialCommands[client_fd].substr(endPos + 1);
     }
@@ -269,7 +269,7 @@ int Server::readFromClient(Client &client)
         while ((endPos = partialCommands[client_fd].find("\n")) != std::string::npos)
         {
             std::string completeCommand = partialCommands[client_fd].substr(0, endPos);
-            commandHandler->handleCommand(completeCommand, client_fd, *this);
+            commandHandler->handleCommand(completeCommand, client_fd, *this, false);
             partialCommands[client_fd] = partialCommands[client_fd].substr(endPos + 1);
         }
 
@@ -292,7 +292,7 @@ ssize_t Server::readFromSocket(int client_fd, char *buffer, size_t size)
     {
         // Disconnection
         std::cout << RED << "Client disconnected: " << client_fd - 3 << RESET << std::endl;
-        commandHandler.handleCommand("QUIT :Remote host closed the connection\r\n", client_fd, *this);
+        commandHandler.handleCommand("QUIT :Remote host closed the connection\r\n", client_fd, *this, false);
         return -1;
     }
     else
