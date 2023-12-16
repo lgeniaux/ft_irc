@@ -86,7 +86,7 @@ void CommandHandler::handleJOIN(const std::vector<std::string> &tokens, int clie
 
         if (channel == NULL)
         {
-            server.joinChannel(channelName, clientNickname);
+            server.joinChannel(channelName, clientNickname, server.getClient(client_fd));
             sendJoinSuccessInfo(server, channelName, client_fd);
         }
         else if (channel->getMode('i') && !channel->isInvited(clientNickname))
@@ -103,7 +103,7 @@ void CommandHandler::handleJOIN(const std::vector<std::string> &tokens, int clie
         }
         else if (!channel->isInChannel(clientNickname))
         {
-            server.joinChannel(channelName, clientNickname);
+            server.joinChannel(channelName, clientNickname, server.getClient(client_fd));
             sendJoinSuccessInfo(server, channelName, client_fd);
             channel = server.getChannel(channelName); // Refresh the channel pointer
             if (channel != NULL && channel->isInvited(clientNickname))

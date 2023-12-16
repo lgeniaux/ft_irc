@@ -2,6 +2,7 @@
 #include "RFC2812Handler.hpp"
 #include "Server.hpp"
 #include <unistd.h>
+#include <arpa/inet.h>
 
 void CommandHandler::handlePART(const std::vector<std::string> &tokens, int client_fd, Server &server)
 {
@@ -20,6 +21,6 @@ void CommandHandler::handlePART(const std::vector<std::string> &tokens, int clie
 	std::string message = "";
 	if (tokens.size() > 2 && tokens[2] != ":")
 		message = " " + tokens[2];
-	channel->broadcastMessageToChannel(":" + nickname + " PART " + channel->getName() + message + "\r\n", server, "");
+	channel->broadcastMessageToChannel(":" + nickname + "!" + nickname + "@" + inet_ntoa(client.getAddress().sin_addr) + " PART " + channel->getName() + message + "\r\n", server, "");
 	server.leaveChannel(channel->getName(), nickname);
 }

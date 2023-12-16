@@ -24,7 +24,7 @@ public:
     Client &getClient(int client_fd);
     // Channel methods
     void createChannel(const std::string &name);
-    void joinChannel(const std::string &name, std::string nickname);
+    void joinChannel(const std::string &name, std::string nickname, Client &client);
     void leaveChannel(const std::string &name, std::string nickname);
     void handleChannelMessage(const std::string &channelName, const std::string &message, const std::string senderNick);
     Channel *getChannel(const std::string &name);

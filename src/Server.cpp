@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <sstream>
 #include <fcntl.h>
+#include <arpa/inet.h>
 #include "Command.hpp"
 #include "RFC2812Handler.hpp"
 
@@ -310,7 +311,7 @@ void Server::createChannel(const std::string &name)
     channels[name] = Channel(name);
 }
 
-void Server::joinChannel(const std::string &name, std::string nickname)
+void Server::joinChannel(const std::string &name, std::string nickname, Client &client)
 {
     if (channels.find(name) == channels.end())
     {
@@ -331,7 +332,7 @@ void Server::joinChannel(const std::string &name, std::string nickname)
 
         RFC2812Handler::sendResponse(333, getClient(getFdFromNickname(nickname)), name + " " + nickname + " " + topicTimeStr);
     }
-    channels[name].broadcastMessageToChannel(":" + nickname + " JOIN :" + name + "\r\n", *this, nickname);
+    channels[name].broadcastMessageToChannel(":" + nickname + "!" + nickname + "@" + inet_ntoa(client.getAddress().sin_addr) + " JOIN :" + name + "\r\n", *this, nickname);
 }
 
 void Server::leaveChannel(const std::string &name, std::string nickname)

@@ -192,7 +192,9 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
                 return;
             }
             channel->setMode(mode[1], true);
-            rfcHandler.sendResponse(324, client, channelName + " +" + mode[1]);
+            message = channelName + " +" + mode[1];
+            rfcHandler.sendResponse(324, client, message);
+            channel->broadcastMessageToChannel(":" + nickname + " MODE " + message + "\r\n", server, nickname);
         }
         else if (modeSign == '-')
         {
