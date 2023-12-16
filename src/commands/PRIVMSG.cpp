@@ -35,11 +35,6 @@ void CommandHandler::handlePRIVMSG(const std::vector<std::string> &tokens, int c
     if (message.size() > 0)
         message.resize(message.size() - 1);
 
-    // Debug
-    // std::cout << "target: "
-    //           << "\"" << target << "\"" << std::endl;
-    // std::cout << "message: " << message << std::endl;
-
     // Get the sender's nickname
     std::string sender_nick = server.getClient(client_fd).getNickname();
     // Craft the message (:Nick!User@Host PRIVMSG #channel/user :message) User and Host seem to be optional
@@ -54,40 +49,20 @@ void CommandHandler::handlePRIVMSG(const std::vector<std::string> &tokens, int c
         // Private message (too lazy to refactor this into a function for the moment)
         if (server.nicknameToClientMap.find(target) != server.nicknameToClientMap.end())
         {
-            // std::cout << "Target found: " << target << std::endl;
             Client *targetClient = server.nicknameToClientMap[target];
-            // DEBUG list all authenticated clients
-            // std::cout << "Authenticated clients: " << std::endl;
-            // for (std::map<int, Client>::iterator it = server.clients.begin(); it != server.clients.end(); ++it)
-            // {
-            //     if (it->second.isAuthenticated())
-            //     {
-            //         std::cout << "\"" << it->second.getNickname() << "\"" << std::endl;
-            //     }
-            // }
-
-            // std::cout << "Target Client details: ";
-            // std::cout << "Nickname: " << targetClient->getNickname();
-            // std::cout << ", FD: " << targetClient->getFd();
-            // std::cout << ", Authenticated: " << (targetClient->isAuthenticated() ? "Yes" : "No") << std::endl;
-
             if (targetClient->isAuthenticated())
             {
-                // std::cout << "Target is authenticated" << std::endl;
                 int target_fd = targetClient->getFd();
                 std::string formattedMessage = rfcHandler.formatMessage(":" + server.getClient(client_fd).getNickname() + " PRIVMSG " + target + " " + message);
                 send(target_fd, formattedMessage.c_str(), formattedMessage.size(), 0);
             }
             else
             {
-                // std::cout << "Target is not authenticated" << std::endl;
                 RFC2812Handler::sendResponse(401, server.getClient(client_fd), target + " :No such nick");
             }
         }
         else
         {
-            // std::cout << "Target not found: "
-            //           << "\"" << target << "\"" << std::endl;
             RFC2812Handler::sendResponse(401, server.getClient(client_fd), target + " :No such nick");
         }
     }
