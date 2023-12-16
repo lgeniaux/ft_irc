@@ -29,6 +29,7 @@ public:
     void handleChannelMessage(const std::string &channelName, const std::string &message, const std::string senderNick);
     Channel *getChannel(const std::string &name);
     void updateNicknameMap(const std::string &oldNick, const std::string &newNick, Client &client);
+    void updateNickChannels(const std::string &oldNick, const std::string &newNick);
     void removeFdFromNicknameMap(int fd);
     friend class CommandHandler;
     int getFdFromNickname(const std::string &nickname);

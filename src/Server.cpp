@@ -276,6 +276,7 @@ int Server::readFromClient(Client &client)
 ssize_t Server::readFromSocket(int client_fd, char *buffer, size_t size)
 {
     ssize_t bytes_read = recv(client_fd, buffer, size, 0);
+    CommandHandler commandHandler;
 
     if (bytes_read <= 0)
     {
@@ -284,10 +285,7 @@ ssize_t Server::readFromSocket(int client_fd, char *buffer, size_t size)
         {
             // Normal disconnection
             std::cout << RED << "Client disconnected: " << client_fd - 3 << RESET << std::endl;
-            CommandHandler commandHandler;
             commandHandler.handleCommand("QUIT :Remote host closed the connection\r\n", client_fd, *this);
-            // close(client_fd);
-            // clients.erase(client_fd); // already done in handleQUIT
             return -1;
         }
         else if (errno == EWOULDBLOCK || errno == EAGAIN)
@@ -299,8 +297,7 @@ ssize_t Server::readFromSocket(int client_fd, char *buffer, size_t size)
         {
             // Other errors
             std::cerr << ERROR << "Failed to read from client or client disconnected." << std::endl;
-            close(client_fd);
-            clients.erase(client_fd);
+            commandHandler.handleCommand("QUIT :Remote host closed the connection\r\n", client_fd, *this);
             return -1;
         }
     }
@@ -400,6 +397,10 @@ void Server::updateNicknameMap(const std::string &oldNick, const std::string &ne
     }
 
     nicknameToClientMap[newNick] = &client;
+}
+
+void Server::updateNickChannels(const std::string &oldNick, const std::string &newNick)
+{
     std::map<std::string, Channel>::iterator it;
     for (it = channels.begin(); it != channels.end(); ++it)
         if (it->second.isInChannel(oldNick))
@@ -448,15 +449,16 @@ void Server::disconnectMarkedClients(fd_set &readfds)
 //broadcast message to a list of users
 void Server::broadcastMessageToUsers(const std::string &message, std::set<std::string> &users)
 {
+    std::cout << LIGHT YELLOW << "Broadcasting message to users: " << RESET << message.substr(0, message.length() - 2) << "(";
     std::set<std::string>::iterator it;
     for (it = users.begin(); it != users.end(); ++it)
     {
+        std::cout << *it << ",";
         int fd = getFdFromNickname(*it);
         if (fd != -1)
-        {
             send(fd, message.c_str(), message.length(), 0);
-        }
     }
+    std::cout << ")" << std::endl;
 }
 
 std::set<std::string> Server::getCommonUsers(const std::string &nickname)

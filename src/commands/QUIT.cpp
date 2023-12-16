@@ -36,8 +36,8 @@ void CommandHandler::handleQUIT(const std::vector<std::string> &tokens, int clie
     {
         if (client_fd != -1)
         { // Check if fd is valid
-            send(client_fd, message.c_str(), message.length(), 0);
 			std::cout << LIGHT GRAY << "Sending message " << RESET << message << LIGHT GRAY << " to " << client.getNickname() << " on fd " << client_fd << RESET << std::endl;
+            send(client_fd, message.c_str(), message.length(), 0);
         }
     }
 

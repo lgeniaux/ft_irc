@@ -5,6 +5,11 @@ void CommandHandler::handlePING(const std::vector<std::string> &tokens, int clie
 {
     (void)tokens;
     Client client = server.getClient(client_fd);
-    std::string message = client.getNickname() + "!" + client.getUsername() + "@" + inet_ntoa(client.getAddress().sin_addr) + " PONG\r\n";
+    std::string message = ":localhost PONG\r\n";
     send(client_fd, message.c_str(), message.length(), 0);
+    while (!message.empty() &&
+           (message[message.size() - 1] == '\r' ||
+            message[message.size() - 1] == '\n'))
+        message.erase(message.size() - 1);
+    std::cout << LIGHT BLUE << "Sending :" << RESET GRAY << message << RESET << std::endl;
 }

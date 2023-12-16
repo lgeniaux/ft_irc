@@ -92,17 +92,19 @@ bool Channel::isInvited(std::string nickname) const
 void Channel::broadcastMessageToChannel(const std::string &message, Server &server, const std::string &sender)
 {
     std::set<std::string>::iterator it;
+    if (sender != "")
+        std::cout << LIGHT << "[" + sender + "]";
+    else
+        std::cout << LIGHT << "[SERVER]";
+    std::cout << YELLOW << "Broadcasting :" << RESET GRAY << message.substr(0, message.length() - 2) << RESET << std::endl;
     for (it = users.begin(); it != users.end(); ++it)
     {
         if (*it != sender)
         {
             std::string nickname = *it;
             int fd = server.getFdFromNickname(nickname);
-            std::cout << LIGHT GRAY << "Sending message " << RESET << message << LIGHT GRAY << " to " << nickname << " on fd " << fd << RESET << std::endl;
             if (fd != -1)
-            { // Check if fd is valid
                 send(fd, message.c_str(), message.length(), 0);
-            }
         }
     }
 }

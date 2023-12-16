@@ -32,12 +32,12 @@ void CommandHandler::handleNICK(const std::vector<std::string> &tokens, int clie
     std::string oldNick = client.getNickname();
 
     // Check if the nickname is not already in use
-    if (server.getFdFromNickname(tokens[1]) != -1)
+    if (server.getFdFromNickname(newNick) != -1)
     {
-        RFC2812Handler::sendResponse(433, client, tokens[1] + " :Nickname is already in use");
-        if (oldNick == "")
+        RFC2812Handler::sendResponse(433, client, newNick + " :Nickname is already in use");
+        if (oldNick == "" || client.getNickReceived() == CONFLICT)
         {
-            client.setNickname(tokens[1]);
+            client.setNickname(newNick);
             client.setNickReceived(CONFLICT);
         }
         return;
@@ -53,6 +53,12 @@ void CommandHandler::handleNICK(const std::vector<std::string> &tokens, int clie
     }
 
     client.setNickname(newNick);
+    if (client.getNickReceived() == CONFLICT)
+    {
+        client.setNickReceived(RECEIVED);
+        server.updateNicknameMap("", client.getNickname(), client);
+        return;
+    }
     client.setNickReceived(RECEIVED);
 
     std::map<std::string, Channel>::iterator it;
@@ -81,4 +87,5 @@ void CommandHandler::handleNICK(const std::vector<std::string> &tokens, int clie
     }
     // Update the nickname to client map in the server
     server.updateNicknameMap(oldNick, newNick, client);
+    server.updateNickChannels(oldNick, newNick);
 }

@@ -6,9 +6,11 @@
 
 void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int client_fd, Server &server)
 {
+    std::string message;
     RFC2812Handler rfcHandler;
     Channel *channel;
     Client &client = server.getClient(client_fd);
+    std::string nickname = client.getNickname();
 
     if (tokens.size() == 2)
     {
@@ -21,7 +23,7 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
         else
         {
             channel = server.getChannel(channelName);
-            if (!channel->isInChannel(client.getNickname()))
+            if (!channel->isInChannel(nickname))
             {
                 rfcHandler.sendResponse(442, client, channelName + " :You're not on that channel");
                 return;
@@ -33,7 +35,9 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
                 std::string limitStr = oss.str(); 
                 if (limitStr == "0")
                     limitStr = "";
-                rfcHandler.sendResponse(324, client, channelName + " " +channel->getModes() + " " + channel->getKey() + " " + limitStr);
+                message = channelName + " " +channel->getModes() + " " + channel->getKey() + " " + limitStr;
+                rfcHandler.sendResponse(324, client, message);
+                channel->broadcastMessageToChannel(":" + nickname + " MODE " + message + "\r\n", server, nickname);
                 return;
             }
         }
@@ -91,7 +95,9 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
             }
             channel->setKey(tokens[3]);
             channel->setMode(mode[1], true);
-            rfcHandler.sendResponse(324, client, channelName + " +" + mode[1] + " " + tokens[3]);
+            message = channelName + " +" + mode[1] + " " + tokens[3];
+            rfcHandler.sendResponse(324, client, message);
+            channel->broadcastMessageToChannel(":" + nickname + " MODE " + message + "\r\n", server, nickname);
         }
         else if (modeSign == '-')
         {
@@ -103,8 +109,10 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
             }
             channel->setKey("");
             channel->setMode(mode[1], false);
-            rfcHandler.sendResponse(324, client, channelName + " -" + mode[1]);
-        }
+            message = channelName + " -" + mode[1];
+            rfcHandler.sendResponse(324, client, message);
+            channel->broadcastMessageToChannel(":" + nickname + " MODE " + message + "\r\n", server, nickname);
+            }
     }
     else if (mode[1] == 'l')
     {
@@ -117,7 +125,9 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
             }
             channel->setLimit(atoi(tokens[3].c_str()));
             channel->setMode(mode[1], true);
-            rfcHandler.sendResponse(324, client, channelName + " +" + mode[1] + " " + tokens[3]);
+            message = channelName + " +" + mode[1] + " " + tokens[3];
+            rfcHandler.sendResponse(324, client, message);
+            channel->broadcastMessageToChannel(":" + nickname + " MODE " + message + "\r\n", server, nickname);            
         }
         else if (modeSign == '-')
         {
@@ -128,7 +138,9 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
             }
             channel->setLimit(0);
             channel->setMode(mode[1], false);
+            message = channelName + " -" + mode[1];
             rfcHandler.sendResponse(324, client, channelName + " -" + mode[1]);
+            channel->broadcastMessageToChannel(":" + nickname + " MODE " + channelName + " -" + mode[1], server, nickname);
         }
     }
     else if (mode[1] == 't')
@@ -141,7 +153,9 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
                 return;
             }
             channel->setMode(mode[1], true);
-            rfcHandler.sendResponse(324, client, channelName + " +" + mode[1]);
+            message = channelName + " +" + mode[1];
+            rfcHandler.sendResponse(324, client, message);
+            channel->broadcastMessageToChannel(":" + nickname + " MODE " + message + "\r\n", server, nickname);
         }
         else if (modeSign == '-')
         {
@@ -151,7 +165,9 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
                 return;
             }
             channel->setMode(mode[1], false);
-            rfcHandler.sendResponse(324, client, channelName + " -" + mode[1]);
+            message = channelName + " -" + mode[1];
+            rfcHandler.sendResponse(324, client, message);        
+            channel->broadcastMessageToChannel(":" + nickname + " MODE " + message + "\r\n", server, nickname);
         }
     }
     else if (mode[1] == 'o')
@@ -186,7 +202,9 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
                 return;
             }
             channel->setMode(mode[1], false);
-            rfcHandler.sendResponse(324, client, channelName + " -" + mode[1]);
+            message = channelName + " -" + mode[1];
+            rfcHandler.sendResponse(324, client, message);
+            channel->broadcastMessageToChannel(":" + nickname + " MODE " + message + "\r\n", server, nickname);
         }
     }
 }
