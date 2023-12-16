@@ -2,6 +2,7 @@
 #include "RFC2812Handler.hpp"
 #include "Server.hpp"
 #include <unistd.h>
+#include <arpa/inet.h>
 
 void CommandHandler::handleQUIT(const std::vector<std::string> &tokens, int client_fd, Server &server)
 {
@@ -11,7 +12,8 @@ void CommandHandler::handleQUIT(const std::vector<std::string> &tokens, int clie
 		server.markClientForDisconnection(client_fd);
 		return;
 	}
-	std::string message = ":" + client.getNickname() + " QUIT";
+	std::string nickname = client.getNickname();
+	std::string message = ":" + nickname + "!" + client.getUsername() + "@" + inet_ntoa(client.getAddress().sin_addr) +" QUIT";
 	for (size_t i = 1; i < tokens.size(); ++i)
 	{
 		message += " " + tokens[i];

@@ -22,6 +22,6 @@ void CommandHandler::handlePART(const std::vector<std::string> &tokens, int clie
 	if (tokens.size() > 2)
 		for (size_t i = 2; i < tokens.size(); i++)
 			message += " " + tokens[i];
-	channel->broadcastMessageToChannel(":" + nickname + "!" + nickname + "@" + inet_ntoa(client.getAddress().sin_addr) + " PART " + channel->getName() + message + "\r\n", server, "");
+	channel->broadcastMessageToChannel(":" + nickname + "!" + client.getUsername() + "@" + inet_ntoa(client.getAddress().sin_addr) + " PART " + channel->getName() + message + "\r\n", server, "");
 	server.leaveChannel(channel->getName(), nickname);
 }

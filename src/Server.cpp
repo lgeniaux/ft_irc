@@ -332,7 +332,7 @@ void Server::joinChannel(const std::string &name, std::string nickname, Client &
 
         RFC2812Handler::sendResponse(333, getClient(getFdFromNickname(nickname)), name + " " + nickname + " " + topicTimeStr);
     }
-    channels[name].broadcastMessageToChannel(":" + nickname + "!" + nickname + "@" + inet_ntoa(client.getAddress().sin_addr) + " JOIN :" + name + "\r\n", *this, nickname);
+    channels[name].broadcastMessageToChannel(":" + nickname + "!" + client.getUsername() + "@" + inet_ntoa(client.getAddress().sin_addr) + " JOIN :" + name + "\r\n", *this, nickname);
 }
 
 void Server::leaveChannel(const std::string &name, std::string nickname)
