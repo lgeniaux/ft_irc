@@ -2,6 +2,7 @@
 #include "RFC2812Handler.hpp"
 #include <algorithm>
 #include <sstream>
+#include <arpa/inet.h>
 
 
 void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int client_fd, Server &server)
@@ -11,6 +12,7 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
     Channel *channel;
     Client &client = server.getClient(client_fd);
     std::string nickname = client.getNickname();
+    std::string nicknameBroadcast = nickname + "!" + client.getUsername() + "@" + inet_ntoa(client.getAddress().sin_addr);
 
     if (tokens.size() == 2)
     {
@@ -37,7 +39,7 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
                     limitStr = "";
                 message = channelName + " " +channel->getModes() + " " + channel->getKey() + " " + limitStr;
                 rfcHandler.sendResponse(324, client, message);
-                channel->broadcastMessageToChannel(":" + nickname + " MODE " + message + "\r\n", server, nickname);
+                channel->broadcastMessageToChannel(":" + nicknameBroadcast + " MODE " + message + "\r\n", server, nickname);
                 return;
             }
         }
@@ -97,7 +99,7 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
             channel->setMode(mode[1], true);
             message = channelName + " +" + mode[1] + " " + tokens[3];
             rfcHandler.sendResponse(324, client, message);
-            channel->broadcastMessageToChannel(":" + nickname + " MODE " + message + "\r\n", server, nickname);
+            channel->broadcastMessageToChannel(":" + nicknameBroadcast + " MODE " + message + "\r\n", server, nickname);
         }
         else if (modeSign == '-')
         {
@@ -111,7 +113,7 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
             channel->setMode(mode[1], false);
             message = channelName + " -" + mode[1];
             rfcHandler.sendResponse(324, client, message);
-            channel->broadcastMessageToChannel(":" + nickname + " MODE " + message + "\r\n", server, nickname);
+            channel->broadcastMessageToChannel(":" + nicknameBroadcast + " MODE " + message + "\r\n", server, nickname);
             }
     }
     else if (mode[1] == 'l')
@@ -127,7 +129,7 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
             channel->setMode(mode[1], true);
             message = channelName + " +" + mode[1] + " " + tokens[3];
             rfcHandler.sendResponse(324, client, message);
-            channel->broadcastMessageToChannel(":" + nickname + " MODE " + message + "\r\n", server, nickname);            
+            channel->broadcastMessageToChannel(":" + nicknameBroadcast + " MODE " + message + "\r\n", server, nickname);            
         }
         else if (modeSign == '-')
         {
@@ -140,7 +142,7 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
             channel->setMode(mode[1], false);
             message = channelName + " -" + mode[1];
             rfcHandler.sendResponse(324, client, channelName + " -" + mode[1]);
-            channel->broadcastMessageToChannel(":" + nickname + " MODE " + channelName + " -" + mode[1], server, nickname);
+            channel->broadcastMessageToChannel(":" + nicknameBroadcast + " MODE " + channelName + " -" + mode[1], server, nickname);
         }
     }
     else if (mode[1] == 't')
@@ -155,7 +157,7 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
             channel->setMode(mode[1], true);
             message = channelName + " +" + mode[1];
             rfcHandler.sendResponse(324, client, message);
-            channel->broadcastMessageToChannel(":" + nickname + " MODE " + message + "\r\n", server, nickname);
+            channel->broadcastMessageToChannel(":" + nicknameBroadcast + " MODE " + message + "\r\n", server, nickname);
         }
         else if (modeSign == '-')
         {
@@ -167,7 +169,7 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
             channel->setMode(mode[1], false);
             message = channelName + " -" + mode[1];
             rfcHandler.sendResponse(324, client, message);        
-            channel->broadcastMessageToChannel(":" + nickname + " MODE " + message + "\r\n", server, nickname);
+            channel->broadcastMessageToChannel(":" + nicknameBroadcast + " MODE " + message + "\r\n", server, nickname);
         }
     }
     else if (mode[1] == 'o')
@@ -181,6 +183,9 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
             channel->addOperator(tokens[3]);
         else
             channel->removeOperator(tokens[3]);
+        message = channelName + " " + modeSign + mode[1] + " " + tokens[3];
+        rfcHandler.sendResponse(324, client, message);
+        channel->broadcastMessageToChannel(":" + nicknameBroadcast + " MODE " + message + "\r\n", server, nickname);
     }
     else if (mode[1] == 'i')
     {
@@ -194,7 +199,7 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
             channel->setMode(mode[1], true);
             message = channelName + " +" + mode[1];
             rfcHandler.sendResponse(324, client, message);
-            channel->broadcastMessageToChannel(":" + nickname + " MODE " + message + "\r\n", server, nickname);
+            channel->broadcastMessageToChannel(":" + nicknameBroadcast + " MODE " + message + "\r\n", server, nickname);
         }
         else if (modeSign == '-')
         {
@@ -206,7 +211,7 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
             channel->setMode(mode[1], false);
             message = channelName + " -" + mode[1];
             rfcHandler.sendResponse(324, client, message);
-            channel->broadcastMessageToChannel(":" + nickname + " MODE " + message + "\r\n", server, nickname);
+            channel->broadcastMessageToChannel(":" + nicknameBroadcast + " MODE " + message + "\r\n", server, nickname);
         }
     }
 }

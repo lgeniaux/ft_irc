@@ -12,12 +12,6 @@ void sendJoinSuccessInfo(Server &server, const std::string &channelName, int cli
     if (!channel)
         return;
 
-    // Send the topic of the channel
-    if (!channel->getTopic().empty())
-    {
-        rfcHandler.sendResponse(332, server.getClient(client_fd), channelName + " :" + channel->getTopic());
-    }
-
     // Send the names list
     std::set<std::string> users = channel->getUsers();
     std::string namesList = "";
