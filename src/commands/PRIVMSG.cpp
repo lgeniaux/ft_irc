@@ -1,6 +1,7 @@
 #include "Command.hpp"
 #include "Server.hpp"
 #include "RFC2812Handler.hpp"
+#include <arpa/inet.h>
 
 void CommandHandler::handlePRIVMSG(const std::vector<std::string> &tokens, int client_fd, Server &server)
 {
@@ -37,8 +38,10 @@ void CommandHandler::handlePRIVMSG(const std::vector<std::string> &tokens, int c
 
     // Get the sender's nickname
     std::string sender_nick = server.getClient(client_fd).getNickname();
-    // Craft the message (:Nick!User@Host PRIVMSG #channel/user :message) User and Host seem to be optional
-    std::string newMessage = rfcHandler.formatMessage(":" + server.getClient(client_fd).getNickname() + " PRIVMSG " + target + " " + message);
+    std::string sender_username = server.getClient(client_fd).getUsername();
+
+    // Craft the message (:Nick!User@Host PRIVMSG #channel/user :message)
+    std::string newMessage = rfcHandler.formatMessage(":" + sender_nick + "!" + sender_username + "@" + inet_ntoa(server.getClient(client_fd).getAddress().sin_addr) + " PRIVMSG " + target + " " + message);
     if (target[0] == '#')
     {
         // Channel message
@@ -46,7 +49,7 @@ void CommandHandler::handlePRIVMSG(const std::vector<std::string> &tokens, int c
     }
     else
     {
-        // Private message (too lazy to refactor this into a function for the moment)
+        // Private message
         if (server.nicknameToClientMap.find(target) != server.nicknameToClientMap.end())
         {
             Client *targetClient = server.nicknameToClientMap[target];

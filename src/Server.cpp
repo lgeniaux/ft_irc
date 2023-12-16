@@ -211,18 +211,21 @@ void Server::authenticateClient(int client_fd)
     }
 
     // Authentication check
-    if (clients[client_fd].isPassReceived() && clients[client_fd].getNickReceived() == RECEIVED && clients[client_fd].isUserReceived())
-    {
+    if (clients[client_fd].isPassReceived() == RECEIVED && clients[client_fd].getNickReceived() == RECEIVED && clients[client_fd].isUserReceived())
+    {       
         clients[client_fd].setAuthenticated(true);
         RFC2812Handler::sendInitialConnectionMessages(clients[client_fd]);
     }
+
     // Debug :
     if (clients[client_fd].isAuthenticated())
         std::cout << "[" << client_fd - 3 << "] " << GREEN << "Client authenticated" << RESET << " | ";
     else
         std::cout << "[" << client_fd - 3 << "] " << RED << "Client not authenticated" << RESET << " | ";
-    if (clients[client_fd].isPassReceived())
+    if (clients[client_fd].isPassReceived() == RECEIVED)
         std::cout << GREEN << "PASS received" << RESET << " | ";
+    else if (clients[client_fd].isPassReceived() == WRONG)
+        std::cout << YELLOW << "PASS wrong" << RESET << " | ";
     else
         std::cout << RED << "PASS not received" << RESET << " | ";
     if (clients[client_fd].getNickReceived() == RECEIVED)

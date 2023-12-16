@@ -1,13 +1,16 @@
 #include "Client.hpp"
 #include <cstring>
 
-Client::Client() : fd(-1), authenticated(false), passReceived(false), nickReceived(NOT_RECEIVED), userReceived(false)
+Client::Client() : fd(-1), authenticated(false), passReceived(NOT_RECEIVED), nickReceived(NOT_RECEIVED), userReceived(false)
 {
     memset(&address, 0, sizeof(address));
+    this->nickname = "";
+    this->username = "";
+    this->realname = "";
 }
 
 Client::Client(int fd, const sockaddr_in &clientAddress)
-    : fd(fd), authenticated(false), address(clientAddress), passReceived(false), nickReceived(false), userReceived(false)
+    : fd(fd), authenticated(false), address(clientAddress), passReceived(NOT_RECEIVED), nickReceived(NOT_RECEIVED), userReceived(false)
 {
 }
 
@@ -61,12 +64,12 @@ std::string Client::getRealname() const
     return realname;
 }
 
-void Client::setPassReceived(bool state)
+void Client::setPassReceived(char state)
 {
     passReceived = state;
 }
 
-bool Client::isPassReceived() const
+char Client::isPassReceived() const
 {
     return passReceived;
 }

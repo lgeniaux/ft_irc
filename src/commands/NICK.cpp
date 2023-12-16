@@ -24,7 +24,8 @@ void CommandHandler::handleNICK(const std::vector<std::string> &tokens, int clie
             }
         }
         client.setNickReceived(RECEIVED);
-        server.updateNicknameMap("", client.getNickname(), client);
+        if (client.isPassReceived() != WRONG)
+            server.updateNicknameMap("", client.getNickname(), client);
         return;
     }
 
@@ -54,7 +55,8 @@ void CommandHandler::handleNICK(const std::vector<std::string> &tokens, int clie
     if (client.getNickReceived() == CONFLICT)
     {
         client.setNickReceived(RECEIVED);
-        server.updateNicknameMap("", client.getNickname(), client);
+        if (client.isPassReceived() != WRONG)
+            server.updateNicknameMap("", client.getNickname(), client);
         return;
     }
     client.setNickReceived(RECEIVED);
@@ -68,6 +70,7 @@ void CommandHandler::handleNICK(const std::vector<std::string> &tokens, int clie
     server.broadcastMessageToUsers(message, commonUsers);
 
     // Update the nickname to client map in the server
-    server.updateNicknameMap(oldNick, newNick, client);
+    if (client.isPassReceived() != WRONG)
+        server.updateNicknameMap(oldNick, newNick, client);
     server.updateNickChannels(oldNick, newNick);
 }

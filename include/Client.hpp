@@ -8,6 +8,7 @@
 #define NOT_RECEIVED 0
 #define RECEIVED 1
 #define CONFLICT 2
+#define WRONG 2
 
 class Client
 {
@@ -29,8 +30,8 @@ public:
     std::string getRealname() const;
 
     // LOGIN FLOW
-    void setPassReceived(bool state);
-    bool isPassReceived() const;
+    void setPassReceived(char state);
+    char isPassReceived() const;
 
     void setNickReceived(char state);
     char getNickReceived() const;
@@ -49,7 +50,7 @@ private:
     std::string username;
     std::string realname;
 
-    bool passReceived;
+    char passReceived;
     char nickReceived;
     bool userReceived;
 };

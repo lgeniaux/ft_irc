@@ -38,7 +38,6 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
                     limitStr = "";
                 message = channelName + " " + channel->getModes() + " " + channel->getKey() + " " + limitStr;
                 rfcHandler.sendResponse(324, client, message);
-                channel->broadcastMessageToChannel(":" + nicknameBroadcast + " MODE " + message + "\r\n", server, nickname);
                 return;
             }
         }
