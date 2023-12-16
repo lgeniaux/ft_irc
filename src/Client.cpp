@@ -11,6 +11,7 @@ Client::Client(int fd, const sockaddr_in &clientAddress)
 {
 }
 
+
 bool Client::isAuthenticated() const
 {
     return authenticated;
@@ -91,3 +92,4 @@ bool Client::isUserReceived() const
 {
     return userReceived;
 }
+

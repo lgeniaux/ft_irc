@@ -41,16 +41,8 @@ void Server::run()
         return;
     }
 
-    // Set the server socket to non-blocking
-    int flags = fcntl(server_fd, F_GETFL, 0);
-    if (flags < 0)
-    {
-        std::cerr << ERROR << "Failed to get flags for socket" << std::endl;
-        return;
-    }
-
-    flags |= O_NONBLOCK;
-    if (fcntl(server_fd, F_SETFL, flags) < 0)
+    //set the socket to non-blocking mode
+    if (fcntl(server_fd, F_SETFL, O_NONBLOCK) < 0)
     {
         std::cerr << ERROR << "Failed to set server socket to non-blocking" << std::endl;
         return;
@@ -99,7 +91,7 @@ void Server::run()
 
         int activity = select(max_sd + 1, &readfds, NULL, NULL, NULL);
 
-        if ((activity < 0) && (errno != EINTR))
+        if (activity < 0)
         {
             perror("select error");
         }
@@ -142,29 +134,11 @@ void Server::acceptClient()
 
     if (client_fd < 0)
     {
-        // Non-blocking mode
-        if (errno == EWOULDBLOCK || errno == EAGAIN)
-        {
-            return; // Not an error, just no connections to accept
-        }
-        else
-        {
-            std::cerr << ERROR << "Failed to accept client" << std::endl;
-            return;
-        }
-    }
-
-    // Set the new client socket to non-blocking mode
-    int flags = fcntl(client_fd, F_GETFL, 0);
-    if (flags < 0)
-    {
-        std::cerr << ERROR << "Failed to get flags for client socket" << std::endl;
-        close(client_fd);
         return;
     }
 
-    flags |= O_NONBLOCK;
-    if (fcntl(client_fd, F_SETFL, flags) < 0)
+    // Set the new client socket to non-blocking mode
+    if (fcntl(client_fd, F_SETFL, O_NONBLOCK) < 0)
     {
         std::cerr << ERROR << "Failed to set client socket to non-blocking" << std::endl;
         close(client_fd);
@@ -279,31 +253,24 @@ ssize_t Server::readFromSocket(int client_fd, char *buffer, size_t size)
     ssize_t bytes_read = recv(client_fd, buffer, size, 0);
     CommandHandler commandHandler;
 
-    if (bytes_read <= 0)
+    std::cout << LIGHT GRAY << "[" << client_fd - 3 << "] bytes read: " << bytes_read << RESET << std::endl;
+    if (bytes_read > 0)
     {
-        std::cout << LIGHT GRAY << "[" << client_fd - 3 << "] bytes read: " << bytes_read << RESET << std::endl;
-        if (bytes_read == 0)
-        {
-            // Normal disconnection
-            std::cout << RED << "Client disconnected: " << client_fd - 3 << RESET << std::endl;
-            commandHandler.handleCommand("QUIT :Remote host closed the connection\r\n", client_fd, *this);
-            return -1;
-        }
-        else if (errno == EWOULDBLOCK || errno == EAGAIN)
-        {
-            // No data available yet
-            return -2;
-        }
-        else
-        {
-            // Other errors
-            std::cerr << ERROR << "Failed to read from client or client disconnected." << std::endl;
-            commandHandler.handleCommand("QUIT :Remote host closed the connection\r\n", client_fd, *this);
-            return -1;
-        }
+        // Successful read
+        return bytes_read;
     }
-
-    return bytes_read;
+    else if (bytes_read == 0)
+    {
+        // Disconnection
+        std::cout << RED << "Client disconnected: " << client_fd - 3 << RESET << std::endl;
+        commandHandler.handleCommand("QUIT :Remote host closed the connection\r\n", client_fd, *this);
+        return -1;
+    }
+    else
+    {
+        // No data available yet
+        return -2;
+    }
 }
 
 void Server::createChannel(const std::string &name)
