@@ -49,7 +49,7 @@ void CommandHandler::handleCommand(const std::string &command, int client_fd, Se
     {   
         if (login)
         {
-            if (tokens[0] != "USER" && tokens[0] != "NICK" && tokens[0] != "PASS")
+            if (tokens[0] != "USER" && tokens[0] != "NICK" && tokens[0] != "PASS" && tokens[0] != "CAP")
                 return;
         }
         commandRegistry[cmd](tokens, client_fd, server);
