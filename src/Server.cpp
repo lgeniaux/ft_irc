@@ -438,6 +438,7 @@ void Server::disconnectMarkedClients(fd_set &readfds)
     for (std::set<int>::iterator it = clientsToDisconnect.begin(); it != clientsToDisconnect.end(); ++it)
     {
         int client_fd = *it;
+        partialCommands.erase(client_fd);
         close(client_fd);
         clients.erase(client_fd);
         FD_CLR(client_fd, &readfds);
