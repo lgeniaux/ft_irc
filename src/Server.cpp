@@ -160,7 +160,6 @@ void Server::acceptClient()
 
     if (client_fd < 0)
     {
-        std::cerr << ERROR << "ERROR: Failed to fetch client fd" << std::endl;
         signalHandler(1);
         return;
     }
