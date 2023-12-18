@@ -38,6 +38,11 @@ void CommandHandler::handleJOIN(const std::vector<std::string> &tokens, int clie
         rfcHandler.sendResponse(461, server.getClient(client_fd), "JOIN :Not enough parameters");
         return;
     }
+    if (tokens[1][0] != '#')
+    {
+        rfcHandler.sendResponse(403, server.getClient(client_fd), tokens[1] + " :Illegal channel name");
+        return;
+    }
 
     std::vector<std::string> channels;
     std::vector<std::string> keys;
