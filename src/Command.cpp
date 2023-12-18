@@ -45,6 +45,12 @@ void CommandHandler::handleCommand(const std::string &command, int client_fd, Se
     for (size_t i = 1; i < tokens.size(); ++i)
         std::cout << " " << tokens[i];
     std::cout << RESET << std::endl;
+    //if client is quitting ignore all commands
+    if (server.getClient(client_fd).getClientQuit())
+    {
+        std::cerr << WARN << "Client is quitting, ignoring command" << std::endl;
+        return;
+    }
     if (commandRegistry.find(cmd) != commandRegistry.end())
     {   
         if (login)

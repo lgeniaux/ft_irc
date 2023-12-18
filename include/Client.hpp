@@ -41,6 +41,8 @@ public:
 
     // getHost (e.g localhost)
     std::string getHost() const;
+    void setClientQuit(bool state);
+    bool getClientQuit() const;
 
 private:
     int fd;
@@ -53,6 +55,7 @@ private:
     char passReceived;
     char nickReceived;
     bool userReceived;
+    bool clientQuit;
 };
 
 #endif

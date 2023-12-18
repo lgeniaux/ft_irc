@@ -10,6 +10,7 @@ void CommandHandler::handleQUIT(const std::vector<std::string> &tokens, int clie
 	if (!client.isAuthenticated())
 	{
 		server.markClientForDisconnection(client_fd);
+		client.setClientQuit(true);
 		return;
 	}
 	std::string nickname = client.getNickname();
@@ -51,5 +52,6 @@ void CommandHandler::handleQUIT(const std::vector<std::string> &tokens, int clie
 			server.leaveChannel(it->second.getName(), client.getNickname());
 		}
 	}
+	client.setClientQuit(true);
 	server.markClientForDisconnection(client_fd);
 }

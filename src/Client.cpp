@@ -7,6 +7,7 @@ Client::Client() : fd(-1), authenticated(false), passReceived(NOT_RECEIVED), nic
     this->nickname = "";
     this->username = "";
     this->realname = "";
+    this->clientQuit = false;
 }
 
 Client::Client(int fd, const sockaddr_in &clientAddress)
@@ -92,4 +93,14 @@ void Client::setUserReceived(bool state)
 bool Client::isUserReceived() const
 {
     return userReceived;
+}
+
+void Client::setClientQuit(bool state)
+{
+    clientQuit = state;
+}
+
+bool Client::getClientQuit() const
+{
+    return clientQuit;
 }
