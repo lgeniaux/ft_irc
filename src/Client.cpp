@@ -13,6 +13,10 @@ Client::Client() : fd(-1), authenticated(false), passReceived(NOT_RECEIVED), nic
 Client::Client(int fd, const sockaddr_in &clientAddress)
     : fd(fd), authenticated(false), address(clientAddress), passReceived(NOT_RECEIVED), nickReceived(NOT_RECEIVED), userReceived(false)
 {
+    this->nickname = "";
+    this->username = "";
+    this->realname = "";
+    this->clientQuit = false;
 }
 
 bool Client::isAuthenticated() const
