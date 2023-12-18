@@ -3,6 +3,7 @@
 
 void CommandHandler::handleUSER(const std::vector<std::string> &tokens, int client_fd, Server &server)
 {
+    Client &client = server.clients[client_fd];
     if (server.clients[client_fd].isAuthenticated())
     {
         RFC2812Handler::sendResponse(462, server.clients[client_fd], ":Unauthorized command (already registered)");
@@ -21,4 +22,10 @@ void CommandHandler::handleUSER(const std::vector<std::string> &tokens, int clie
     server.clients[client_fd].setUsername(username);
     server.clients[client_fd].setRealname(realname);
     server.clients[client_fd].setUserReceived(true);
+    // Authentication check
+    if (client.isPassReceived() == RECEIVED && client.getNickReceived() == RECEIVED && client.isUserReceived() && !client.isAuthenticated())
+    {       
+        client.setAuthenticated(true);
+        RFC2812Handler::sendInitialConnectionMessages(client);
+    }
 }

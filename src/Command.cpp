@@ -6,7 +6,7 @@
 #include <map>
 #include <unistd.h>
 
-void CommandHandler::handleCommand(const std::string &command, int client_fd, Server &server, bool login)
+void CommandHandler::handleCommand(const std::string &command, int client_fd, Server &server)
 {
 
     std::istringstream iss(command);
@@ -53,9 +53,9 @@ void CommandHandler::handleCommand(const std::string &command, int client_fd, Se
     }
     if (commandRegistry.find(cmd) != commandRegistry.end())
     {   
-        if (login)
+        if (!server.getClient(client_fd).isAuthenticated())
         {
-            if (tokens[0] != "USER" && tokens[0] != "NICK" && tokens[0] != "PASS" && tokens[0] != "CAP")
+            if (tokens[0] != "USER" && tokens[0] != "NICK" && tokens[0] != "PASS" && tokens[0] != "CAP" && tokens[0] != "QUIT")
                 return;
         }
         commandRegistry[cmd](tokens, client_fd, server);

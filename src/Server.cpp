@@ -205,17 +205,11 @@ void Server::authenticateClient(int client_fd)
         std::istringstream f(completeCommand);
         std::string line;
         while (std::getline(f, line))
-            commandHandler->handleCommand(line, client_fd, *this, true);
+            commandHandler->handleCommand(line, client_fd, *this);
 
         partialCommands[client_fd] = partialCommands[client_fd].substr(endPos + 1);
     }
 
-    // Authentication check
-    if (clients[client_fd].isPassReceived() == RECEIVED && clients[client_fd].getNickReceived() == RECEIVED && clients[client_fd].isUserReceived())
-    {       
-        clients[client_fd].setAuthenticated(true);
-        RFC2812Handler::sendInitialConnectionMessages(clients[client_fd]);
-    }
 
     // Debug :
     if (clients[client_fd].isAuthenticated())
@@ -269,7 +263,7 @@ int Server::readFromClient(Client &client)
         while ((endPos = partialCommands[client_fd].find("\n")) != std::string::npos)
         {
             std::string completeCommand = partialCommands[client_fd].substr(0, endPos);
-            commandHandler->handleCommand(completeCommand, client_fd, *this, false);
+            commandHandler->handleCommand(completeCommand, client_fd, *this);
             partialCommands[client_fd] = partialCommands[client_fd].substr(endPos + 1);
         }
 
@@ -292,7 +286,7 @@ ssize_t Server::readFromSocket(int client_fd, char *buffer, size_t size)
     {
         // Disconnection
         std::cout << RED << "Client disconnected: " << client_fd - 3 << RESET << std::endl;
-        commandHandler.handleCommand("QUIT :Remote host closed the connection\r\n", client_fd, *this, false);
+        commandHandler.handleCommand("QUIT :Remote host closed the connection\r\n", client_fd, *this);
         return -1;
     }
     else
@@ -343,12 +337,13 @@ void Server::leaveChannel(const std::string &name, std::string nickname)
     if (channels.find(name) != channels.end())
     {
         channels[name].removeUser(nickname);
+        //Check if there are no more users in the channel, if so called the deleteChannel function
+        if (channels[name].getUsers().size() == 0)
+        {
+            deleteChannel(name);
+        }
     }
-    //Check if there are no more users in the channel, if so called the deleteChannel function
-    if (channels[name].getUsers().size() == 0)
-    {
-        deleteChannel(name);
-    }
+
 }
 
 void Server::handleChannelMessage(const std::string &channelName, const std::string &message, std::string senderNick)

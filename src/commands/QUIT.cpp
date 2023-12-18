@@ -45,13 +45,21 @@ void CommandHandler::handleQUIT(const std::vector<std::string> &tokens, int clie
 	}
 
 	std::map<std::string, Channel>::iterator it;
-	for (it = server.channels.begin(); it != server.channels.end(); ++it)
-	{
-		if (it->second.isInChannel(client.getNickname()))
+
+	if (server.channels.size() > 0){
+		for (it = server.channels.begin();
+		it != server.channels.end();
+		++it)
 		{
-			server.leaveChannel(it->second.getName(), client.getNickname());
+			if (it->second.isInChannel(client.getNickname()))
+			{
+				server.leaveChannel(it->second.getName(), client.getNickname());
+			}
+			if (server.channels.size() == 0)
+				break;
 		}
 	}
+
 	client.setClientQuit(true);
 	server.markClientForDisconnection(client_fd);
 }

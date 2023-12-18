@@ -4,15 +4,16 @@
 
 void CommandHandler::handlePASS(const std::vector<std::string> &tokens, int client_fd, Server &server)
 {
-    if (server.clients[client_fd].isAuthenticated())
+    Client &client = server.clients[client_fd];
+    if (client.isAuthenticated())
     {
-        RFC2812Handler::sendResponse(462, server.clients[client_fd], ":You may not reregister");
+        RFC2812Handler::sendResponse(462, client, ":You may not reregister");
         return;
     }
 
     if (tokens.size() < 2)
     {
-        RFC2812Handler::sendResponse(461, server.clients[client_fd], "PASS :Not enough parameters");
+        RFC2812Handler::sendResponse(461, client, "PASS :Not enough parameters");
         return;
     }
 
@@ -20,13 +21,20 @@ void CommandHandler::handlePASS(const std::vector<std::string> &tokens, int clie
     std::cout << suppliedPassword << std::endl;
     if (suppliedPassword != server.password)
     {
-        RFC2812Handler::sendResponse(464, server.clients[client_fd], ":Password incorrect");
-        server.clients[client_fd].setPassReceived(WRONG);
+        RFC2812Handler::sendResponse(464, client, ":Password incorrect");
+        client.setPassReceived(WRONG);
+        client.setClientQuit(true);
         server.markClientForDisconnection(client_fd);
         return;
     }
     else
     {
-        server.clients[client_fd].setPassReceived(RECEIVED);
+        client.setPassReceived(RECEIVED);
+        // Authentication check
+        if (client.isPassReceived() == RECEIVED && client.getNickReceived() == RECEIVED && client.isUserReceived() && !client.isAuthenticated())
+        {       
+            client.setAuthenticated(true);
+            RFC2812Handler::sendInitialConnectionMessages(client);
+        }
     }
 }

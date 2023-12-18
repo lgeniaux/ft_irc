@@ -24,6 +24,12 @@ void CommandHandler::handleNICK(const std::vector<std::string> &tokens, int clie
             }
         }
         client.setNickReceived(RECEIVED);
+        // Authentication check
+        if (client.isPassReceived() == RECEIVED && client.getNickReceived() == RECEIVED && client.isUserReceived() && !client.isAuthenticated())
+        {       
+            client.setAuthenticated(true);
+            RFC2812Handler::sendInitialConnectionMessages(client);
+        }
         if (client.isPassReceived() != WRONG)
             server.updateNicknameMap("", client.getNickname(), client);
         return;
@@ -60,6 +66,12 @@ void CommandHandler::handleNICK(const std::vector<std::string> &tokens, int clie
         return;
     }
     client.setNickReceived(RECEIVED);
+    // Authentication check
+    if (client.isPassReceived() == RECEIVED && client.getNickReceived() == RECEIVED && client.isUserReceived() && !client.isAuthenticated())
+    {       
+        client.setAuthenticated(true);
+        RFC2812Handler::sendInitialConnectionMessages(client);
+    }
 
     std::map<std::string, Channel>::iterator it;
     std::string message = ":" + oldNick + " NICK :" + newNick + "\r\n";

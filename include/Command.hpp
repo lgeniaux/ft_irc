@@ -12,7 +12,7 @@
 class CommandHandler
 {
 public:
-    void handleCommand(const std::string &command, int client_fd, Server &server, bool login);
+    void handleCommand(const std::string &command, int client_fd, Server &server);
 
 private:
     static Channel *preChecks(const std::string nickname, int client_fd, Server &server, const bool needOp);
