@@ -18,7 +18,6 @@ void CommandHandler::handlePASS(const std::vector<std::string> &tokens, int clie
     }
 
     std::string suppliedPassword = tokens[1];
-    std::cout << suppliedPassword << std::endl;
     if (suppliedPassword != server.password)
     {
         RFC2812Handler::sendResponse(464, client, ":Password incorrect");

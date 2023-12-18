@@ -7,7 +7,6 @@ void CommandHandler::handleINVITE(const std::vector<std::string> &tokens, int cl
 {
     RFC2812Handler rfcHandler;
 
-    std::cout << "Command INVITE from " << server.getClient(client_fd).getNickname() << std::endl;
     if (tokens.size() < 3)
     {
         rfcHandler.sendResponse(461, server.getClient(client_fd), "INVITE :Not enough parameters");
@@ -31,7 +30,6 @@ void CommandHandler::handleINVITE(const std::vector<std::string> &tokens, int cl
     // if the channel is invite only and the sending client is not an operator
     if (channel->getMode('i') && !channel->isOperator(server.getClient(client_fd).getNickname()))
     {
-        std::cout << "Channel is invite only and the sending client is not an operator" << std::endl;
         rfcHandler.sendResponse(482, server.getClient(client_fd), channelName + " :You're not channel operator");
         return;
     }
@@ -39,7 +37,6 @@ void CommandHandler::handleINVITE(const std::vector<std::string> &tokens, int cl
     // if the channel does not exist
     if (channel == NULL)
     {
-        std::cout << "Channel does not exist" << std::endl;
         rfcHandler.sendResponse(403, server.getClient(client_fd), server.getClient(client_fd).getNickname() + " " + channelName + " :No such channel");
         return;
     }
@@ -47,7 +44,6 @@ void CommandHandler::handleINVITE(const std::vector<std::string> &tokens, int cl
     // if the sending client is not in the channel
     if (!channel->isInChannel(server.getClient(client_fd).getNickname()))
     {
-        std::cout << "Sending client is not in the channel" << std::endl;
         rfcHandler.sendResponse(442, server.getClient(client_fd), channelName + " :You're not on that channel");
         return;
     }
@@ -55,7 +51,6 @@ void CommandHandler::handleINVITE(const std::vector<std::string> &tokens, int cl
     // if user is already in channel (Channel class has isInChannel method)
     if (channel->isInChannel(recipientNickname))
     {
-        std::cout << "User is already in channel" << std::endl;
         rfcHandler.sendResponse(443, server.getClient(client_fd), server.getClient(client_fd).getNickname() + " " + recipientNickname + " " + channelName + " :is already on channel");
         return;
     }
@@ -63,12 +58,10 @@ void CommandHandler::handleINVITE(const std::vector<std::string> &tokens, int cl
     // if the recipient is already invited or in the channel
     if (channel->isInvited(recipientNickname))
     {
-        std::cout << "Recipient is already invited or in the channel" << std::endl;
         rfcHandler.sendResponse(443, server.getClient(client_fd), recipientNickname + " " + channelName + " :is already invited / is already on channel");
         return;
     }
 
-    std::cout << "No error conditions met" << std::endl;
     // if no error conditions are met, update the status and send the invite to the recipient (:NICK!USER@HOST INVITE recipient channel)
     channel->inviteUser(recipientNickname);
     std::string formattedMessage = ":" + server.getClient(client_fd).getNickname() + " INVITE " + recipientNickname + " " + channelName;

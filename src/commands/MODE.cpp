@@ -99,7 +99,6 @@ void CommandHandler::handleMODE(const std::vector<std::string> &tokens, int clie
         }
         else if (modeSign == '-')
         {
-            std::cout << channel->getMode(mode[1]) << std::endl;
             if (channel->getMode(mode[1]) == false)
             {
                 rfcHandler.sendResponse(501, client, "MODE :flag is already set or unset");
