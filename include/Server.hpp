@@ -39,6 +39,7 @@ public:
     // Returns a list of all users which have a channel in common with the client without the duplicates
     std::set<std::string> getCommonUsers(const std::string &nickname);
     static void signalHandler(int signal);
+    void deleteChannel(const std::string &name);
 
 private:
     int port;

@@ -331,11 +331,23 @@ void Server::joinChannel(const std::string &name, std::string nickname, Client &
     channels[name].broadcastMessageToChannel(":" + nickname + "!" + client.getUsername() + "@" + inet_ntoa(client.getAddress().sin_addr) + " JOIN :" + name + "\r\n", *this, "");
 }
 
+void Server::deleteChannel(const std::string &name)
+{
+    channels.erase(name);
+
+
+}
+
 void Server::leaveChannel(const std::string &name, std::string nickname)
 {
     if (channels.find(name) != channels.end())
     {
         channels[name].removeUser(nickname);
+    }
+    //Check if there are no more users in the channel, if so called the deleteChannel function
+    if (channels[name].getUsers().size() == 0)
+    {
+        deleteChannel(name);
     }
 }
 
