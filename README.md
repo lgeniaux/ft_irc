@@ -1,13 +1,14 @@
 # 🌐 ft_irc - RFC2812 Compliant IRC Server
 
-![C++98](https://img.shields.io/badge/C++-98-blue.svg)
-![RFC2812](https://img.shields.io/badge/RFC2812-Compliant-green.svg)
-![Build](https://img.shields.io/badge/Build-Passing-brightgreen.svg)
-![Network Programming](https://img.shields.io/badge/Network-Programming-orange.svg)
+<div align="center">
 
-> A sophisticated Internet Relay Chat (IRC) server implementation in C++98, featuring advanced network programming, comprehensive protocol compliance, and production-quality architecture.
+[![IRC Server Demo](demo.gif)](demo.gif)
 
-![IRC Server Demo](demo.gif)
+![C++98](https://img.shields.io/badge/C++-98-blue.svg) ![RFC2812](https://img.shields.io/badge/RFC2812-Compliant-green.svg) ![Build](https://img.shields.io/badge/Build-Passing-brightgreen.svg) ![Network Programming](https://img.shields.io/badge/Network-Programming-orange.svg)
+
+*A sophisticated Internet Relay Chat (IRC) server implementation in C++98, featuring advanced network programming, comprehensive protocol compliance, and production-quality architecture.*
+
+</div>
 
 ## ✨ Technical Highlights
 
